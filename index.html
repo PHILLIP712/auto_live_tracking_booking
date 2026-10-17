@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Local Rapido - EV Auto WB19M3264</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --accent-yellow: #facc15;
+      --bg-dark: #0f172a;
+      --card-bg: rgba(15, 23, 42, 0.90);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+      z-index: 1;
+    }
+
+    /* Top Navigation Bar */
+    .top-bar {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .brand-pill {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      padding: 10px 18px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      pointer-events: auto;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.15rem;
+    }
+
+    .brand-text h1 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .plate-badge {
+      font-size: 0.72rem;
+      background: var(--accent-yellow);
+      color: #000;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 5px;
+      letter-spacing: 1px;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+
+    .brand-text p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-main);
+      pointer-events: auto;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+      animation: pulse-dot 1.8s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Telemetry HUD */
+    .telemetry-card {
+      position: absolute;
+      top: 86px;
+      left: 16px;
+      z-index: 1000;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 16px;
+      width: 290px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      color: var(--text-main);
+    }
+
+    .telemetry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .telemetry-coords {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .coord-box {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .coord-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .coord-val {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: monospace;
+    }
+
+    .telemetry-metrics {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+    }
+
+    .metric-item {
+      text-align: center;
+    }
+
+    .metric-item span {
+      display: block;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .metric-item strong {
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+
+    .recenter-btn {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Bottom Reservation Control */
+    .bottom-bar {
+      position: absolute;
+      bottom: 24px;
+      left: 16px;
+      right: 16px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .rate-info-pill {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 18px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .book-btn {
+      width: 100%;
+      max-width: 450px;
+      background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+      color: #000;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 18px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 12px 28px rgba(234, 179, 8, 0.4);
+      pointer-events: auto;
+      transition: all 0.2s ease;
+    }
+
+    .book-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(234, 179, 8, 0.5);
+    }
+
+    /* Custom Auto Vehicle Marker */
+    .custom-auto-marker {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .marker-label-tag {
+      background: #000;
+      color: var(--accent-yellow);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--accent-yellow);
+      white-space: nowrap;
+      margin-bottom: 2px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .marker-pulse {
+      position: absolute;
+      top: 18px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.35);
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    .marker-core {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      background: #059669;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.6); opacity: 0.8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    /* Rapido-Style Booking Sheet */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .booking-sheet {
+      background: var(--bg-dark);
+      border-top: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 520px;
+      border-radius: 28px 28px 0 0;
+      padding: 24px;
+      box-shadow: 0 -10px 45px rgba(0,0,0,0.6);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active .booking-sheet {
+      transform: translateY(0);
+    }
+
+    .sheet-handle {
+      width: 42px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+
+    .sheet-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .sheet-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .sheet-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .ride-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .ride-card {
+      border: 1.5px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .ride-card.active {
+      border-color: var(--accent-yellow);
+      background: rgba(250, 204, 21, 0.1);
+    }
+
+    .ride-card i {
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+      color: var(--accent-yellow);
+    }
+
+    .ride-card h4 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .ride-card p {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-yellow);
+    }
+
+    .fare-card {
+      background: rgba(250, 204, 21, 0.08);
+      border: 1px solid rgba(250, 204, 21, 0.25);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .fare-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .fare-amount {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--accent-yellow);
+    }
+
+    .sheet-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      flex: 2;
+      background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+      color: #000;
+      border: none;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 480px) {
+      .telemetry-card {
+        width: calc(100% - 32px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Leaflet Map Container -->
+  <div id="map"></div>
+
+  <!-- Header -->
+  <div class="top-bar">
+    <div class="brand-pill">
+      <div class="brand-icon">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
+      <div class="brand-text">
+        <h1>Father's Auto <span class="plate-badge">WB19M3264</span></h1>
+        <p>Local Rapido • Raypur / Budge Budge</p>
+      </div>
+    </div>
+
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      <span id="connBadgeText">Live ESP8266</span>
+    </div>
+  </div>
+
+  <!-- Telemetry HUD -->
+  <div class="telemetry-card">
+    <div class="telemetry-header">
+      <span><i class="fa-solid fa-satellite-dish"></i> Auto WB19M3264</span>
+      <span style="color: var(--primary); font-weight: 600;">Active Lock</span>
+    </div>
+
+    <div class="telemetry-coords">
+      <div class="coord-box">
+        <div class="coord-label">Latitude</div>
+        <div class="coord-val" id="latVal">--.----° N</div>
+      </div>
+      <div class="coord-box">
+        <div class="coord-label">Longitude</div>
+        <div class="coord-val" id="lngVal">--.----° E</div>
+      </div>
+    </div>
+
+    <div class="telemetry-metrics">
+      <div class="metric-item">
+        <span>Speed</span>
+        <strong id="spdVal">0 km/h</strong>
+      </div>
+      <div class="metric-item">
+        <span>EV Battery</span>
+        <strong id="batVal">-- %</strong>
+      </div>
+      <div class="metric-item">
+        <span>Last Ping</span>
+        <strong id="lastPing">Waiting...</strong>
+      </div>
+    </div>
+
+    <button class="recenter-btn" onclick="recenterMap()">
+      <i class="fa-solid fa-crosshairs"></i> Recenter On Auto
+    </button>
+  </div>
+
+  <!-- Bottom Reservation CTA -->
+  <div class="bottom-bar">
+    <div class="rate-info-pill">
+      <i class="fa-solid fa-circle-check" style="color: var(--primary);"></i> In Service • Fixed Local Tariff
+    </div>
+    <button class="book-btn" onclick="openBookingModal()">
+      <i class="fa-solid fa-taxi"></i> Book Auto (WB19M3264)
+    </button>
+  </div>
+
+  <!-- Rapido Booking Modal -->
+  <div class="modal-overlay" id="bookingModal">
+    <div class="booking-sheet">
+      <div class="sheet-handle"></div>
+      
+      <div class="sheet-top">
+        <div>
+          <h2 class="sheet-title">Book Auto Ride</h2>
+          <p class="sheet-subtitle">Vehicle: <strong>WB19M3264</strong> • Fast Local Pickup</p>
+        </div>
+        <span class="plate-badge">WB19M3264</span>
+      </div>
+
+      <div class="ride-options">
+        <div class="ride-card active" id="rideSolo" onclick="selectRideType('Solo Booking (Personal)', 30)">
+          <i class="fa-solid fa-user"></i>
+          <h4>Solo / Reserved</h4>
+          <p>Direct door-to-door</p>
+        </div>
+        <div class="ride-card" id="rideShared" onclick="selectRideType('Local Shared Route', 15)">
+          <i class="fa-solid fa-users"></i>
+          <h4>Local Shared</h4>
+          <p>Standard route fare</p>
+        </div>
+      </div>
+
+      <form id="bookingForm" onsubmit="handleBookingSubmit(event)">
+        <div class="input-group">
+          <label class="input-label">Passenger Name</label>
+          <input type="text" class="input-field" id="custName" placeholder="e.g. Rahul Das" required>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Passenger Phone Number</label>
+          <input type="tel" class="input-field" id="custPhone" placeholder="10-digit mobile number" required>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Pickup Location (Landmark)</label>
+          <input type="text" class="input-field" id="pickupLoc" placeholder="e.g. Raypur Bazar / Kalika Pure" required>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Drop Destination</label>
+          <input type="text" class="input-field" id="dropLoc" placeholder="e.g. Budge Budge Railway Station" required>
+        </div>
+
+        <div class="fare-card">
+          <div>
+            <div class="fare-title">Estimated Neighborhood Tariff</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);" id="rideTypeLabel">Solo / Reserved Ride</div>
+          </div>
+          <div class="fare-amount" id="fareDisplay">₹30 - ₹60</div>
+        </div>
+
+        <div class="sheet-actions">
+          <button type="button" class="btn-cancel" onclick="closeBookingModal()">Cancel</button>
+          <button type="submit" class="btn-confirm">Request Pickup Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- MQTT.js over WebSocket -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <script>
+    // --- 1. Map Initialization (Esri WorldStreetMap) ---
+    const map = L.map('map', { zoomControl: true }).setView([22.4837, 88.2023], 15);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri'
+    }).addTo(map);
+
+    // Custom Marker for Auto WB19M3264
+    const autoIcon = L.divIcon({
+      className: 'custom-auto-marker',
+      html: `
+        <div class="marker-label-tag">WB19M3264</div>
+        <div class="marker-pulse"></div>
+        <div class="marker-core">
+          <i class="fa-solid fa-taxi"></i>
+        </div>
+      `,
+      iconSize: [80, 50],
+      iconAnchor: [40, 40]
+    });
+
+    let autoMarker = L.marker([22.4837, 88.2023], { icon: autoIcon }).addTo(map);
+    autoMarker.bindPopup("<b>Father's EV Auto</b><br>Plate: <b>WB19M3264</b><br>Status: Ready for booking").openPopup();
+
+    const routePolyline = L.polyline([], {
+      color: '#10b981',
+      weight: 4,
+      opacity: 0.85,
+      dashArray: '6, 8'
+    }).addTo(map);
+
+    // --- 2. State & Filtering ---
+    let pathHistory = [];
+    let isFirstLiveLock = true;
+    let lastKnownLat = 22.4837;
+    let lastKnownLng = 88.2023;
+    let selectedRide = "Solo Booking (Personal)";
+
+    function updateAutoPosition(lat, lng, speed, battery) {
+      lastKnownLat = lat;
+      lastKnownLng = lng;
+
+      // On first hardware coordinate: clear any initial history and lock camera
+      if (isFirstLiveLock) {
+        pathHistory = [];
+        routePolyline.setLatLngs([]);
+        map.setView([lat, lng], 17, { animate: true });
+        isFirstLiveLock = false;
+      }
+
+      // Filter stationary jitter (ignore < 15m jitter if speed is 0)
+      let recordPoint = true;
+      if (pathHistory.length > 0) {
+        const lastPoint = pathHistory[pathHistory.length - 1];
+        const latDelta = Math.abs(lastPoint[0] - lat);
+        const lngDelta = Math.abs(lastPoint[1] - lng);
+
+        if ((!speed || speed === 0) && (latDelta < 0.00015 && lngDelta < 0.00015)) {
+          recordPoint = false;
+        }
+      }
+
+      if (recordPoint) {
+        pathHistory.push([lat, lng]);
+        routePolyline.setLatLngs(pathHistory);
+      }
+
+      // Move marker & update HUD
+      autoMarker.setLatLng([lat, lng]);
+      document.getElementById('latVal').innerText = lat.toFixed(4) + '° N';
+      document.getElementById('lngVal').innerText = lng.toFixed(4) + '° E';
+      document.getElementById('spdVal').innerText = (speed !== undefined ? speed : 0) + ' km/h';
+      if (battery) document.getElementById('batVal').innerText = battery + ' %';
+      document.getElementById('lastPing').innerText = new Date().toLocaleTimeString();
+    }
+
+    function recenterMap() {
+      map.setView([lastKnownLat, lastKnownLng], 17, { animate: true });
+    }
+
+    // --- 3. Live Hardware MQTT Connection ---
+    const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt";
+    const MQTT_TOPIC_LOC = "autox/father/location";
+    const MQTT_TOPIC_BOOK = "autox/father/booking";
+
+    let mqttClient = null;
+
+    function connectMQTT() {
+      try {
+        mqttClient = mqtt.connect(MQTT_BROKER);
+
+        mqttClient.on('connect', () => {
+          console.log('[MQTT] Connected to HiveMQ Broker');
+          document.getElementById('connBadgeText').innerText = "Live ESP8266";
+          mqttClient.subscribe(MQTT_TOPIC_LOC);
+        });
+
+        mqttClient.on('message', (topic, message) => {
+          if (topic === MQTT_TOPIC_LOC) {
+            try {
+              const data = JSON.parse(message.toString());
+              if (data.lat && data.lng) {
+                updateAutoPosition(
+                  parseFloat(data.lat), 
+                  parseFloat(data.lng), 
+                  data.speed !== undefined ? parseInt(data.speed) : 0, 
+                  data.battery || 85
+                );
+              }
+            } catch (err) {
+              console.error("[MQTT] JSON parse error:", err);
+            }
+          }
+        });
+
+        mqttClient.on('error', (err) => {
+          console.warn('[MQTT] Warning:', err);
+        });
+      } catch (e) {
+        console.warn("[MQTT] Sandboxed connection error:", e);
+      }
+    }
+
+    connectMQTT();
+
+    // --- 4. Ride Selection ---
+    function openBookingModal() {
+      document.getElementById('bookingModal').classList.add('active');
+    }
+
+    function closeBookingModal() {
+      document.getElementById('bookingModal').classList.remove('active');
+    }
+
+    function selectRideType(type, basePrice) {
+      selectedRide = type;
+      document.getElementById('rideSolo').classList.toggle('active', type.includes('Solo'));
+      document.getElementById('rideShared').classList.toggle('active', type.includes('Shared'));
+      document.getElementById('rideTypeLabel').innerText = type;
+
+      if (type.includes('Solo')) {
+        document.getElementById('fareDisplay').innerText = "₹30 - ₹60";
+      } else {
+        document.getElementById('fareDisplay').innerText = "₹15 - ₹25";
+      }
+    }
+
+    // --- 5. Telegram Driver Alert Dispatch ---
+    function handleBookingSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('custName').value;
+      const phone = document.getElementById('custPhone').value;
+      const pickup = document.getElementById('pickupLoc').value;
+      const drop = document.getElementById('dropLoc').value;
+      const bookingTime = new Date().toLocaleTimeString();
+
+      const bookingPayload = {
+        vehicle: "WB19M3264",
+        rideType: selectedRide,
+        name: name,
+        phone: phone,
+        pickup: pickup,
+        drop: drop,
+        time: bookingTime
+      };
+
+      // 1. MQTT Publish for physical dashboard hardware
+      if (mqttClient && mqttClient.connected) {
+        mqttClient.publish(MQTT_TOPIC_BOOK, JSON.stringify(bookingPayload));
+      }
+
+      // 2. Direct Telegram Notification
+      const botToken = "8996052322:AAF00rv8jAiPSvSLCsqteM552JWZzRr3ULg"; //[cite: 5]
+      const chatId = "8972994192"; //[cite: 6]
+
+      const alertMessage = 
+        `🛺 *NEW RAPIDO AUTO BOOKING!*\n` +
+        `━━━━━━━━━━━━━━━━━━━\n` +
+        `🚗 *Vehicle:* WB19M3264\n` +
+        `💺 *Ride Type:* ${selectedRide}\n` +
+        `👤 *Passenger:* ${name}\n` +
+        `📞 *Contact:* [${phone}](tel:${phone})\n` +
+        `📍 *Pickup:* ${pickup}\n` +
+        `🏁 *Drop:* ${drop}\n` +
+        `⏰ *Requested At:* ${bookingTime}\n` +
+        `🗺️ [Open Pickup in Maps](https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pickup)})`;
+
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(alertMessage)}&parse_mode=Markdown`) //[cite: 5, 6]
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) {
+            console.log("[Telegram] Alert delivered to driver!");
+          } else {
+            console.error("[Telegram] API error:", data.description);
+          }
+        })
+        .catch(err => console.error("[Telegram] Network error:", err));
+
+      alert(`✅ Ride Requested Successfully!\nVehicle: WB19M3264\nYour father has received the pickup alert for ${pickup} to ${drop}.`);
+      document.getElementById('bookingForm').reset();
+      closeBookingModal();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Driver Cockpit - Auto WB19M3264</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #10b981;
+      --accent-yellow: #facc15;
+      --accent-blue: #38bdf8;
+      --danger: #ef4444;
+      --bg-dark: #090d16;
+      --card-bg: rgba(15, 23, 42, 0.95);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      background: var(--bg-dark);
+      overflow: hidden;
+    }
+
+    #driverMap {
+      height: 100%;
+      width: 100%;
+      z-index: 1;
+    }
+
+    .driver-header {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .driver-badge {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      padding: 10px 18px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      pointer-events: auto;
+    }
+
+    .plate-badge {
+      background: var(--accent-yellow);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .duty-toggle-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      pointer-events: auto;
+    }
+
+    .duty-toggle-btn.offline {
+      background: #475569;
+      box-shadow: none;
+    }
+
+    /* Active Trip Banner for Father */
+    .active-trip-card {
+      position: absolute;
+      bottom: 24px;
+      left: 16px;
+      right: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+      z-index: 1050;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 2px solid var(--primary);
+      border-radius: 24px;
+      padding: 20px;
+      display: none;
+      color: #fff;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+
+    .active-trip-card.active { display: block; }
+
+    /* Incoming Order Modal Alert */
+    .incoming-order-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .incoming-order-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .order-card {
+      background: #0f172a;
+      border: 2px solid var(--accent-yellow);
+      border-radius: 26px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      color: #fff;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+    }
+
+    .order-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn-reject {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 15px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-accept {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 4000; background: #0f172a; color: #fff; border: 1px solid var(--accent-yellow); padding: 10px 18px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; max-width: 90%; text-align: center; display: none; }
+  </style>
+</head>
+<body>
+
+  <div id="driverMap"></div>
+
+  <!-- Top Bar -->
+  <div class="driver-header">
+    <div class="driver-badge">
+      <i class="fa-solid fa-id-badge" style="color: var(--primary);"></i>
+      <div>
+        <strong style="font-size: 0.85rem;">Father's Cockpit</strong>
+        <span class="plate-badge">WB19M3264</span>
+      </div>
+    </div>
+
+    <button class="duty-toggle-btn" id="dutyBtn" onclick="toggleDuty()">
+      <i class="fa-solid fa-circle-dot"></i> ON DUTY
+    </button>
+  </div>
+
+  <!-- Active Trip Card for Driver -->
+  <div class="active-trip-card" id="activeTripCard">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span style="font-size: 0.8rem; background: var(--primary); color: #fff; font-weight: 800; padding: 2px 8px; border-radius: 4px;">ACTIVE RIDE</span>
+      <span style="font-size: 0.8rem; color: var(--accent-yellow); font-weight: 700;"><span id="tripPhase">Go to pickup</span></span>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <h3 id="actPassengerName" style="font-size: 1.1rem;">Passenger Name</h3>
+      <a href="#" id="actPassengerPhone" style="color: var(--primary); font-size: 0.9rem; font-weight: 700; text-decoration: none;">📞 Phone</a>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 14px;">
+      <button style="flex: 1; background: #2563eb; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer;" id="navBtn" onclick="openNav()">
+        <i class="fa-solid fa-location-arrow"></i> Navigate to Pickup
+      </button>
+      <button style="flex: 1; background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; cursor: pointer;" id="mainBtn" onclick="mainAction()">
+        Start Trip (enter OTP)
+      </button>
+    </div>
+  </div>
+
+  <!-- Incoming Order Popup -->
+  <div class="incoming-order-overlay" id="orderOverlay">
+    <div class="order-card">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+        <span style="background: var(--accent-yellow); color: #000; font-weight: 800; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;">NEW RIDE DISPATCH</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);" id="orderTime">Just Now</span>
+      </div>
+
+      <h3 style="font-size: 1.25rem;" id="pName">Passenger</h3>
+      <a href="#" style="color: var(--primary); font-weight: 700;" id="pPhone">📞 Phone</a>
+
+      <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin: 14px 0; font-size: 0.85rem;">
+        <div><strong style="color: var(--primary);">PICKUP:</strong> <span id="pPickup">--</span></div>
+        <div style="margin-top: 6px;"><strong style="color: var(--danger);">DROP:</strong> <span id="pDrop">--</span></div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(250,204,21,0.1); padding: 10px 14px; border-radius: 10px;">
+        <span>Distance: <strong id="pDist">0 km</strong></span>
+        <span style="font-size: 1.3rem; font-weight: 800; color: var(--accent-yellow);" id="pFare">₹0</span>
+      </div>
+
+      <div class="order-actions">
+        <button class="btn-reject" onclick="driverReject()">Reject</button>
+        <button class="btn-accept" onclick="driverAccept()">Accept Ride</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+
+  <script>
+    const map = L.map('driverMap', { zoomControl: true }).setView([22.4837, 88.2023], 15);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri'
+    }).addTo(map);
+
+    const autoMarker = L.marker([22.4837, 88.2023], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div style="display:flex;flex-direction:column;align-items:center;width:80px;"><div style="background:#000;color:#facc15;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:4px;border:1px solid #facc15;">WB19M3264</div>
+               <div style="width:38px;height:38px;background:#059669;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;box-shadow:0 4px 12px rgba(0,0,0,0.4);"><i class="fa-solid fa-taxi"></i></div></div>`,
+        iconSize: [80, 50],
+        iconAnchor: [40, 45]
+      })
+    }).addTo(map);
+
+    let isDutyOn = true;
+    let incomingOrder = null;   // popup showing, not answered yet
+    let activeOrder = null;     // accepted ride
+    let currentOtp = null;
+    let tripStarted = false;
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg; t.style.display = 'block';
+      clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 4000);
+    }
+
+    function toggleDuty() {
+      isDutyOn = !isDutyOn;
+      const btn = document.getElementById('dutyBtn');
+      btn.classList.toggle('offline', !isDutyOn);
+      btn.innerHTML = isDutyOn ? '<i class="fa-solid fa-circle-dot"></i> ON DUTY' : '<i class="fa-solid fa-moon"></i> OFF DUTY';
+    }
+
+    const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt";
+    const TOPIC_ROOT = "autox/father";   // must match index.html and the .ino
+    const TOPIC_LOC  = TOPIC_ROOT + "/location";
+    const TOPIC_BOOK = TOPIC_ROOT + "/booking";
+    const TOPIC_RES  = TOPIC_ROOT + "/response";
+
+    const mqttClient = mqtt.connect(MQTT_BROKER, { reconnectPeriod: 3000 });
+    const respond = (obj) => mqttClient.publish(TOPIC_RES, JSON.stringify(obj), { qos: 1 });
+
+    mqttClient.on('connect', () => mqttClient.subscribe([TOPIC_LOC, TOPIC_BOOK, TOPIC_RES]));
+
+    mqttClient.on('message', (topic, msg) => {
+      let data;
+      try { data = JSON.parse(msg.toString()); } catch (e) { return; }
+      if (!data || typeof data !== 'object') return;
+
+      if (topic === TOPIC_LOC) {
+        const lat = parseFloat(data.lat), lng = parseFloat(data.lng);
+        if (!isNaN(lat) && !isNaN(lng)) autoMarker.setLatLng([lat, lng]);
+      } else if (topic === TOPIC_BOOK) {
+        handleBooking(data);
+      } else if (topic === TOPIC_RES && data.status === "CANCELLED") {
+        // Passenger cancelled
+        if (incomingOrder && incomingOrder.id === data.id) {
+          incomingOrder = null;
+          document.getElementById('orderOverlay').classList.remove('active');
+          toast("Passenger cancelled the request.");
+        } else if (activeOrder && activeOrder.id === data.id) {
+          clearActiveRide();
+          toast("Passenger cancelled the ride.");
+        }
+      }
+    });
+
+    function handleBooking(data) {
+      if (!data.id || !data.name) return;
+      if ((incomingOrder && incomingOrder.id === data.id) || (activeOrder && activeOrder.id === data.id)) return; // duplicate
+      if (!isDutyOn) { respond({ id: data.id, status: "REJECTED", reason: "offduty" }); return; }
+      if (incomingOrder || activeOrder) { respond({ id: data.id, status: "REJECTED", reason: "busy" }); return; }
+
+      incomingOrder = data;
+      document.getElementById('pName').innerText = data.name;
+      document.getElementById('pPhone').innerText = `📞 ${data.phone}`;
+      document.getElementById('pPhone').href = `tel:${data.phone}`;
+      document.getElementById('pPickup').innerText = data.pickup;
+      document.getElementById('pDrop').innerText = data.drop;
+      document.getElementById('pDist').innerText = `${data.distance} km`;
+      document.getElementById('pFare').innerText = `₹${data.fare}`;
+      document.getElementById('orderTime').innerText = data.time || "Just Now";
+      document.getElementById('orderOverlay').classList.add('active');
+      if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+    }
+
+    function driverAccept() {
+      if (!incomingOrder) return;
+      activeOrder = incomingOrder;
+      incomingOrder = null;
+      tripStarted = false;
+      currentOtp = String(Math.floor(1000 + Math.random() * 9000));
+      respond({ id: activeOrder.id, status: "ACCEPTED", otp: currentOtp });
+
+      document.getElementById('orderOverlay').classList.remove('active');
+      document.getElementById('actPassengerName').innerText = activeOrder.name;
+      document.getElementById('actPassengerPhone').innerText = `📞 ${activeOrder.phone}`;
+      document.getElementById('actPassengerPhone').href = `tel:${activeOrder.phone}`;
+      document.getElementById('tripPhase').innerText = "Go to pickup";
+      document.getElementById('navBtn').innerHTML = '<i class="fa-solid fa-location-arrow"></i> Navigate to Pickup';
+      document.getElementById('mainBtn').innerText = "Start Trip (enter OTP)";
+      document.getElementById('activeTripCard').classList.add('active');
+      openNav();
+    }
+
+    const validPoint = (p) => Array.isArray(p) && p.length === 2 && p.every(n => typeof n === 'number' && isFinite(n));
+
+    function openNav() {
+      if (!activeOrder) return;
+      const pt = tripStarted ? activeOrder.dropRaw : activeOrder.pickupRaw;
+      const label = tripStarted ? activeOrder.drop : activeOrder.pickup;
+      if (validPoint(pt)) {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${pt[0]},${pt[1]}`, '_blank');
+      } else {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(label)}`, '_blank');
+      }
+    }
+
+    function mainAction() {
+      if (!activeOrder) return;
+      if (!tripStarted) {
+        const code = prompt("Enter the OTP shown on the passenger's phone");
+        if (code === null) return;
+        if (code.trim() !== currentOtp) { toast("Wrong OTP. Ask the passenger again."); return; }
+        tripStarted = true;
+        respond({ id: activeOrder.id, status: "STARTED" });
+        document.getElementById('tripPhase').innerText = "Trip in progress";
+        document.getElementById('navBtn').innerHTML = '<i class="fa-solid fa-location-arrow"></i> Navigate to Drop';
+        document.getElementById('mainBtn').innerText = "Complete Ride";
+        openNav();
+      } else if (confirm("Complete trip and collect fare?")) {
+        respond({ id: activeOrder.id, status: "COMPLETED" });
+        clearActiveRide();
+      }
+    }
+
+    function clearActiveRide() {
+      document.getElementById('activeTripCard').classList.remove('active');
+      activeOrder = null;
+      currentOtp = null;
+      tripStarted = false;
+    }
+
+    function driverReject() {
+      if (incomingOrder) respond({ id: incomingOrder.id, status: "REJECTED", reason: "declined" });
+      incomingOrder = null;
+      document.getElementById('orderOverlay').classList.remove('active');
+    }
+  </script>
+</body>
+</html>

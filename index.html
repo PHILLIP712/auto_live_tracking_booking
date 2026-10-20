@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Yatri Sathi Local - EV Auto WB19M3264</title>
+  <title>Cholo Auto - EV WB19M3264</title>
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -86,7 +86,7 @@
     }
 
     .brand-text h1 {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 800;
       color: var(--text-main);
       display: flex;
@@ -132,7 +132,7 @@
       50% { opacity: 0.4; transform: scale(0.85); }
     }
 
-    /* Live Tracking Bottom Card (Active when driver accepts) */
+    /* Live Tracking Bottom Card */
     .ride-status-card {
       position: absolute;
       bottom: 24px;
@@ -386,6 +386,7 @@
     }
 
     .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 4000; background: #0f172a; color: #fff; border: 1px solid var(--accent-yellow); padding: 10px 18px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; max-width: 90%; text-align: center; display: none; }
+    
     .marker-core {
       width: 38px;
       height: 38px;
@@ -411,7 +412,7 @@
     <div class="brand-pill">
       <div class="brand-icon"><i class="fa-solid fa-taxi"></i></div>
       <div class="brand-text">
-        <h1>Yatri Sathi <span class="plate-badge">WB19M3264</span></h1>
+        <h1>Cholo Auto <span class="plate-badge">WB19M3264</span></h1>
       </div>
     </div>
 
@@ -434,7 +435,7 @@
     </button>
   </div>
 
-  <!-- Live Pickup Tracking Card (Appears when driver accepts) -->
+  <!-- Live Pickup Tracking Card -->
   <div class="ride-status-card" id="rideStatusCard">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
       <div>
@@ -497,7 +498,7 @@
       <form id="orderForm" onsubmit="submitRideRequest(event)">
         <div class="input-box">
           <label class="input-label">Passenger Name</label>
-          <input type="text" class="input-field" id="custName" placeholder="e.g. Arpan Ghosh" required>
+          <input type="text" class="input-field" id="custName" placeholder="e.g. Rahul Das" required>
         </div>
 
         <div class="input-box">
@@ -538,7 +539,7 @@
   <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 
   <script>
-    // --- 1. Map Initialization (Esri WorldStreetMap) ---
+    // --- 1. Map Initialization ---
     const map = L.map('map', { zoomControl: true }).setView([22.4837, 88.2023], 15);
 
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -561,14 +562,7 @@
 
     // Dynamic Route Lines
     let tripPolyline = L.polyline([], { color: '#facc15', weight: 4, dashArray: '6, 8' }).addTo(map);
-    
-    // Live Pulsing Route from Auto to Customer Pickup
-    let driverToPickupLine = L.polyline([], {
-      color: '#38bdf8',
-      weight: 6,
-      opacity: 0.9,
-      dashArray: '8, 10'
-    }).addTo(map);
+    let driverToPickupLine = L.polyline([], { color: '#38bdf8', weight: 6, opacity: 0.9, dashArray: '8, 10' }).addTo(map);
 
     // State
     let autoCoords = [22.4837, 88.2023];
@@ -580,6 +574,9 @@
     let currentTripDistance = 0;
     let calculatedFare = 20;
     let isRideActive = false;
+
+    // Passenger Success Chime 
+    const successChime = new Audio('https://assets.mixkit.co/active_storage/sfx/1123/1123-preview.mp3');
 
     // --- 2. GPS Location & Pin Selection ---
     function useCurrentLocationForPickup() {
@@ -615,7 +612,7 @@
 
         if (!dropCoords) startPinSelection('drop');
         else updateTripRoute();
-      }, () => toast("Couldn't get your location. Allow location access (needs https) or pick on the map."),
+      }, () => toast("Couldn't get your location. Allow location access or pick on the map."),
       { enableHighAccuracy: true, timeout: 10000 });
     }
 
@@ -669,7 +666,6 @@
       openBookingSheet();
     }
 
-    // Distance calculation helper (Haversine)
     function calcDist(p1, p2) {
       const R = 6371;
       const dLat = (p2[0] - p1[0]) * Math.PI / 180;
@@ -691,37 +687,30 @@
       }
     }
 
-    // --- 3. Live Driver Tracking to Customer Pickup ---
+    // --- 3. Live Driver Tracking ---
     function updateDriverPickupRoute(fit = false) {
       if (isRideActive && pickupCoords) {
-        // Draw blue line from Auto to Customer Pickup
         driverToPickupLine.setLatLngs([autoCoords, pickupCoords]);
-
         const distToPickup = calcDist(autoCoords, pickupCoords);
         document.getElementById('hudPickupDist').innerText = `${distToPickup} km away`;
-
-        // Calculate realistic ETA assuming 20 km/h neighborhood auto speed
         const etaMins = Math.max(1, Math.round((distToPickup / 20) * 60));
         document.getElementById('hudPickupEta').innerText = `~${etaMins} mins`;
-
-        // Keep both the auto and the customer pickup nicely centered in view
         if (fit) map.fitBounds(driverToPickupLine.getBounds(), { padding: [70, 70] });
       }
     }
 
-    // --- 4. MQTT Telemetry & Response Pipeline ---
+    // --- 4. MQTT Telemetry ---
     const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt";
-    const TOPIC_ROOT = "autox/father";   // change to something unique; must match driver.html and the .ino
+    const TOPIC_ROOT = "autox/father";   
     const TOPIC_LOC  = TOPIC_ROOT + "/location";
     const TOPIC_BOOK = TOPIC_ROOT + "/booking";
     const TOPIC_RES  = TOPIC_ROOT + "/response";
 
-    // Telegram alert. Anything in this file is public to every visitor, so use a NEW token
-    // (revoke the old one in @BotFather) and ideally move this call behind a small server/worker.
+    // Telegram keys
     const TELEGRAM_BOT_TOKEN = "PASTE_NEW_BOT_TOKEN";
     const TELEGRAM_CHAT_ID   = "PASTE_CHAT_ID";
 
-    let currentBookingId = null;   // id of the ride this browser requested
+    let currentBookingId = null;   
     let pendingTimer = null;
     let lastLocTime = 0;
 
@@ -738,9 +727,9 @@
       mqttClient.subscribe([TOPIC_LOC, TOPIC_RES]);
       if (!currentBookingId) setStatus(lastLocTime ? "Tracking Live" : "Waiting for auto...");
     });
+    
     mqttClient.on('offline', () => setStatus("Reconnecting..."));
 
-    // Mark the auto offline if no GPS update for 30 s
     setInterval(() => {
       if (!currentBookingId && lastLocTime && Date.now() - lastLocTime > 30000) setStatus("Auto offline");
     }, 5000);
@@ -762,15 +751,20 @@
       }
 
       if (topic === TOPIC_RES) {
-        // Ignore responses that are not for MY booking
         if (!currentBookingId || data.id !== currentBookingId) return;
 
         if (data.status === "ACCEPTED") {
           clearTimeout(pendingTimer);
           isRideActive = true;
-          document.getElementById('rideTitle').innerText = "Father is on the way!";
+          document.getElementById('rideTitle').innerText = "Cholo Auto is on the way!";
           document.getElementById('hudOtp').innerText = data.otp;
           setStatus("Driver Arriving");
+          
+          // Play the success chime for the passenger
+          successChime.play().catch(e => console.log("Passenger audio blocked", e));
+          
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+          
           updateDriverPickupRoute(true);
         } else if (data.status === "STARTED") {
           isRideActive = false;
@@ -838,6 +832,9 @@
       if (!pickupCoords || !dropCoords) { toast("Please set both Pickup and Drop points on the map."); return; }
       if (!mqttClient.connected) { toast("Not connected. Check your internet and try again."); return; }
 
+      // Dummy user gesture unlock for audio (in case browser is strict)
+      successChime.play().then(() => { successChime.pause(); successChime.currentTime = 0; }).catch(() => {});
+
       const name = document.getElementById('custName').value.trim();
       const phone = document.getElementById('custPhone').value.replace(/[\s-]/g, '');
       if (!/^(\+91|91|0)?[6-9]\d{9}$/.test(phone)) { toast("Enter a valid 10-digit mobile number."); return; }
@@ -863,7 +860,6 @@
       const mapLink = `https://www.google.com/maps/dir/?api=1&origin=${pickupCoords[0]},${pickupCoords[1]}&destination=${dropCoords[0]},${dropCoords[1]}`;
       sendTelegramAlert(orderPayload, mapLink);
 
-      // Waiting state
       closeBookingSheet();
       document.getElementById('bookingBar').style.display = 'none';
       document.getElementById('rideTitle').innerText = "Waiting for driver...";

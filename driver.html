@@ -93,6 +93,7 @@
       gap: 8px;
       box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
       pointer-events: auto;
+      transition: all 0.3s ease;
     }
 
     .duty-toggle-btn.offline {
@@ -100,7 +101,7 @@
       box-shadow: none;
     }
 
-    /* Active Trip Banner for Father */
+    /* Active Trip Banner */
     .active-trip-card {
       position: absolute;
       bottom: 24px;
@@ -118,15 +119,14 @@
       color: #fff;
       box-shadow: 0 20px 50px rgba(0,0,0,0.8);
     }
-
     .active-trip-card.active { display: block; }
 
-    /* Incoming Order Modal Alert */
+    /* Incoming Order Modal Alert (Yatri Sathi Style) */
     .incoming-order-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(12px);
       z-index: 3000;
       display: flex;
       align-items: center;
@@ -150,7 +150,14 @@
       max-width: 440px;
       padding: 24px;
       color: #fff;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      box-shadow: 0 25px 60px rgba(250, 204, 21, 0.15);
+      transform: scale(0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Bounce effect when popup appears */
+    .incoming-order-overlay.active .order-card {
+      transform: scale(1);
     }
 
     .order-actions {
@@ -164,9 +171,10 @@
       background: rgba(239, 68, 68, 0.15);
       color: var(--danger);
       border: 1px solid var(--danger);
-      padding: 15px;
+      padding: 16px;
       border-radius: 14px;
       font-weight: 800;
+      font-size: 1rem;
       cursor: pointer;
     }
 
@@ -174,11 +182,20 @@
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #fff;
       border: none;
-      padding: 15px;
+      padding: 16px;
       border-radius: 14px;
       font-weight: 800;
+      font-size: 1rem;
       cursor: pointer;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      animation: pulse-btn 1.5s infinite;
     }
+
+    @keyframes pulse-btn {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
     .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 4000; background: #0f172a; color: #fff; border: 1px solid var(--accent-yellow); padding: 10px 18px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; max-width: 90%; text-align: center; display: none; }
   </style>
 </head>
@@ -196,12 +213,13 @@
       </div>
     </div>
 
-    <button class="duty-toggle-btn" id="dutyBtn" onclick="toggleDuty()">
-      <i class="fa-solid fa-circle-dot"></i> ON DUTY
+    <!-- STARTS OFF DUTY TO ALLOW AUDIO UNLOCK -->
+    <button class="duty-toggle-btn offline" id="dutyBtn" onclick="toggleDuty()">
+      <i class="fa-solid fa-moon"></i> OFF DUTY
     </button>
   </div>
 
-  <!-- Active Trip Card for Driver -->
+  <!-- Active Trip Card -->
   <div class="active-trip-card" id="activeTripCard">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
       <span style="font-size: 0.8rem; background: var(--primary); color: #fff; font-weight: 800; padding: 2px 8px; border-radius: 4px;">ACTIVE RIDE</span>
@@ -215,33 +233,33 @@
 
     <div style="display: flex; gap: 10px; margin-top: 14px;">
       <button style="flex: 1; background: #2563eb; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer;" id="navBtn" onclick="openNav()">
-        <i class="fa-solid fa-location-arrow"></i> Navigate to Pickup
+        <i class="fa-solid fa-location-arrow"></i> Navigate
       </button>
       <button style="flex: 1; background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; cursor: pointer;" id="mainBtn" onclick="mainAction()">
-        Start Trip (enter OTP)
+        Start Trip (OTP)
       </button>
     </div>
   </div>
 
-  <!-- Incoming Order Popup -->
+  <!-- Incoming Order Popup (Bounces in) -->
   <div class="incoming-order-overlay" id="orderOverlay">
     <div class="order-card">
       <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-        <span style="background: var(--accent-yellow); color: #000; font-weight: 800; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;">NEW RIDE DISPATCH</span>
+        <span style="background: var(--accent-yellow); color: #000; font-weight: 800; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; animation: pulse-btn 1s infinite;">NEW RIDE DISPATCH</span>
         <span style="font-size: 0.75rem; color: var(--text-muted);" id="orderTime">Just Now</span>
       </div>
 
-      <h3 style="font-size: 1.25rem;" id="pName">Passenger</h3>
-      <a href="#" style="color: var(--primary); font-weight: 700;" id="pPhone">📞 Phone</a>
+      <h3 style="font-size: 1.3rem;" id="pName">Passenger</h3>
+      <a href="#" style="color: var(--primary); font-weight: 700; display: block; margin-top: 4px;" id="pPhone">📞 Phone</a>
 
       <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin: 14px 0; font-size: 0.85rem;">
         <div><strong style="color: var(--primary);">PICKUP:</strong> <span id="pPickup">--</span></div>
-        <div style="margin-top: 6px;"><strong style="color: var(--danger);">DROP:</strong> <span id="pDrop">--</span></div>
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);"><strong style="color: var(--danger);">DROP:</strong> <span id="pDrop">--</span></div>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(250,204,21,0.1); padding: 10px 14px; border-radius: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(250,204,21,0.1); padding: 12px 14px; border-radius: 10px;">
         <span>Distance: <strong id="pDist">0 km</strong></span>
-        <span style="font-size: 1.3rem; font-weight: 800; color: var(--accent-yellow);" id="pFare">₹0</span>
+        <span style="font-size: 1.4rem; font-weight: 800; color: var(--accent-yellow);" id="pFare">₹0</span>
       </div>
 
       <div class="order-actions">
@@ -274,11 +292,17 @@
       })
     }).addTo(map);
 
-    let isDutyOn = true;
-    let incomingOrder = null;   // popup showing, not answered yet
-    let activeOrder = null;     // accepted ride
+    // CRITICAL: Must start as false to force the driver to click "ON DUTY", unlocking the audio
+    let isDutyOn = false; 
+    let incomingOrder = null;
+    let activeOrder = null;
     let currentOtp = null;
     let tripStarted = false;
+    let vibrationInterval = null;
+
+    // Loud, looping phone ringtone (Rapido Style)
+    const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    ringtone.loop = true;
 
     function toast(msg) {
       const t = document.getElementById('toast');
@@ -291,10 +315,18 @@
       const btn = document.getElementById('dutyBtn');
       btn.classList.toggle('offline', !isDutyOn);
       btn.innerHTML = isDutyOn ? '<i class="fa-solid fa-circle-dot"></i> ON DUTY' : '<i class="fa-solid fa-moon"></i> OFF DUTY';
+      
+      // Unlock audio safely
+      if (isDutyOn) {
+        ringtone.play().then(() => {
+          ringtone.pause();
+          ringtone.currentTime = 0;
+        }).catch(e => console.log("Audio unlock required", e));
+      }
     }
 
     const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt";
-    const TOPIC_ROOT = "autox/father";   // must match index.html and the .ino
+    const TOPIC_ROOT = "autox/father";   
     const TOPIC_LOC  = TOPIC_ROOT + "/location";
     const TOPIC_BOOK = TOPIC_ROOT + "/booking";
     const TOPIC_RES  = TOPIC_ROOT + "/response";
@@ -315,8 +347,8 @@
       } else if (topic === TOPIC_BOOK) {
         handleBooking(data);
       } else if (topic === TOPIC_RES && data.status === "CANCELLED") {
-        // Passenger cancelled
         if (incomingOrder && incomingOrder.id === data.id) {
+          stopAlert(); // Passenger cancelled before driver answered
           incomingOrder = null;
           document.getElementById('orderOverlay').classList.remove('active');
           toast("Passenger cancelled the request.");
@@ -329,7 +361,7 @@
 
     function handleBooking(data) {
       if (!data.id || !data.name) return;
-      if ((incomingOrder && incomingOrder.id === data.id) || (activeOrder && activeOrder.id === data.id)) return; // duplicate
+      if ((incomingOrder && incomingOrder.id === data.id) || (activeOrder && activeOrder.id === data.id)) return; 
       if (!isDutyOn) { respond({ id: data.id, status: "REJECTED", reason: "offduty" }); return; }
       if (incomingOrder || activeOrder) { respond({ id: data.id, status: "REJECTED", reason: "busy" }); return; }
 
@@ -342,12 +374,31 @@
       document.getElementById('pDist').innerText = `${data.distance} km`;
       document.getElementById('pFare').innerText = `₹${data.fare}`;
       document.getElementById('orderTime').innerText = data.time || "Just Now";
+      
+      // 1. Show the bouncing popup
       document.getElementById('orderOverlay').classList.add('active');
-      if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+      
+      // 2. Play continuous loud ringtone
+      ringtone.play().catch(e => console.log("Tap screen to allow audio", e));
+      
+      // 3. Heavy continuous vibration pattern (Rapido style)
+      if (navigator.vibrate) {
+        vibrationInterval = setInterval(() => { navigator.vibrate([500, 200, 500, 200]); }, 1500);
+      }
+    }
+
+    function stopAlert() {
+      ringtone.pause();
+      ringtone.currentTime = 0;
+      clearInterval(vibrationInterval);
+      if (navigator.vibrate) navigator.vibrate(0); // kill vibration
     }
 
     function driverAccept() {
       if (!incomingOrder) return;
+      
+      stopAlert(); // Silence the phone
+      
       activeOrder = incomingOrder;
       incomingOrder = null;
       tripStarted = false;
@@ -363,6 +414,14 @@
       document.getElementById('mainBtn').innerText = "Start Trip (enter OTP)";
       document.getElementById('activeTripCard').classList.add('active');
       openNav();
+    }
+
+    function driverReject() {
+      stopAlert(); // Silence the phone
+      
+      if (incomingOrder) respond({ id: incomingOrder.id, status: "REJECTED", reason: "declined" });
+      incomingOrder = null;
+      document.getElementById('orderOverlay').classList.remove('active');
     }
 
     const validPoint = (p) => Array.isArray(p) && p.length === 2 && p.every(n => typeof n === 'number' && isFinite(n));
@@ -401,12 +460,6 @@
       activeOrder = null;
       currentOtp = null;
       tripStarted = false;
-    }
-
-    function driverReject() {
-      if (incomingOrder) respond({ id: incomingOrder.id, status: "REJECTED", reason: "declined" });
-      incomingOrder = null;
-      document.getElementById('orderOverlay').classList.remove('active');
     }
   </script>
 </body>

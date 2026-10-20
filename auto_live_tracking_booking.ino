@@ -1,17 +1,19 @@
+#define TINY_GSM_MODEM_SIM800 // Define modem for TinyGSM
+
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h>
 #include <ESP8266WiFi.h>
+#include <TinyGsmClient.h>
 #include <PubSubClient.h>
 
 // --- Pin Definitions ---
 // D2 (GPIO4) connected to SIM800L TX
-// D1 (GPIO5) connected to SIM800L RX (via 1k/2k voltage divider)
+// D1 (GPIO5) connected to SIM800L RX (via voltage divider)
 // D5 (GPIO14) connected to NEO-6M GPS TX
-// D6 (GPIO12) GPS TX (Unused / GPS only sends)
 const int GSM_RX = 4;   
 const int GSM_TX = 5;   
 const int GPS_RX = 14;  
-const int GPS_TX = 12;  
+const int GPS_TX = 12;  // Unused
 
 SoftwareSerial gsmSerial(GSM_RX, GSM_TX); 
 SoftwareSerial gpsSerial(GPS_RX, GPS_TX); 
@@ -20,7 +22,11 @@ TinyGPSPlus gps;
 // --- Vehicle Identity ---
 const char* VEHICLE_NO = "WB19M3264";
 
-// --- Wi-Fi Fallback Credentials (Your Mobile Hotspot) ---
+// --- Network Credentials ---
+const char* apn = "bsnlnet";
+const char* gprsUser = "";
+const char* gprsPass = "";
+
 const char* ssid = "Infinix";
 const char* password = "1234567890";
 
@@ -29,8 +35,11 @@ const char* mqtt_server = "broker.hivemq.com";
 const int mqtt_port = 1883;
 const char* mqtt_topic = "autox/father/location";
 
-WiFiClient espClient;
-PubSubClient mqttClient(espClient);
+// --- Clients ---
+TinyGsm modem(gsmSerial);
+TinyGsmClient gsmClient(modem);
+WiFiClient wifiClient;
+PubSubClient mqttClient;
 
 // --- State Tracking ---
 bool useGSM = true;
@@ -41,28 +50,42 @@ const int MAX_GSM_FAILURES = 3;
 
 void setup() {
   Serial.begin(115200);
-  gsmSerial.begin(9600);
-  gpsSerial.begin(9600);
+  delay(10);
   
-  delay(2000);
   Serial.println("\n====================================");
   Serial.print("[INFO] Starting Auto Tracker - Vehicle: ");
   Serial.println(VEHICLE_NO);
   Serial.println("====================================");
 
-  // Initialize SIM800L with BSNL data-pack check
-  if (initGSMWithDataCheck()) {
-    Serial.println("[SUCCESS] BSNL GPRS data pack verified! (GSM Mode Active)");
-    useGSM = true;
+  // Initialize GSM
+  gsmSerial.begin(9600);
+  Serial.println("[GSM] Initializing SIM800L...");
+  
+  if (modem.restart()) {
+    Serial.println("[GSM] Modem restarted successfully.");
+    Serial.print("[GSM] Connecting to BSNL GPRS...");
+    if (modem.gprsConnect(apn, gprsUser, gprsPass)) {
+      Serial.println(" OK!");
+      useGSM = true;
+      mqttClient.setClient(gsmClient);
+    } else {
+      Serial.println(" FAILED. Data uncharged or poor signal.");
+      triggerWiFiFallback();
+    }
   } else {
-    Serial.println("[WARNING] BSNL data check failed (Expired/Uncharged or no 2G data). Switching to Wi-Fi Fallback...");
-    setupWiFi();
-    useGSM = false;
+    Serial.println("[GSM] Modem not responding.");
+    triggerWiFiFallback();
   }
+
+  mqttClient.setServer(mqtt_server, mqtt_port);
+  gpsSerial.begin(9600);
 }
 
 void loop() {
-  // Feed GPS serial stream
+  // ESP8266 SoftwareSerial limitation: We must explicitly listen to the GPS 
+  // when we want coordinates, because the GSM module might interrupt it.
+  gpsSerial.listen();
+  
   while (gpsSerial.available() > 0) {
     gps.encode(gpsSerial.read());
   }
@@ -76,74 +99,28 @@ void loop() {
       float lng = gps.location.lng();
       float speed = gps.speed.kmph();
 
-      // JSON Telemetry Payload
       String payload = "{\"vehicle\":\"" + String(VEHICLE_NO) + 
                        "\",\"lat\":" + String(lat, 6) + 
                        ",\"lng\":" + String(lng, 6) + 
                        ",\"speed\":" + String((int)speed) + "}";
 
-      if (useGSM) {
-        sendViaGSM(payload);
-      } else {
-        if (!mqttClient.connected()) {
-          reconnectWiFiMQTT();
-        }
-        mqttClient.loop();
-        mqttClient.publish(mqtt_topic, payload.c_str());
-        Serial.println("[WiFi MQTT] " + payload);
-      }
+      // Switch listening back to GSM module to send data
+      gsmSerial.listen(); 
+      publishTelemetry(payload);
+
     } else {
-      Serial.println("[GPS] Searching for satellite lock...");
+      Serial.println("[GPS] Searching for satellite lock in West Bengal sky...");
     }
   }
 }
 
-// --- BSNL Network & Data Pack Check ---
-bool initGSMWithDataCheck() {
-  Serial.println("[GSM] Checking SIM800L response...");
-  gsmSerial.println("AT");
-  delay(1000);
-  if (!gsmSerial.find("OK")) return false;
-
-  // Tower registration check
-  gsmSerial.println("AT+CREG?");
-  delay(1000);
-
-  // Attach GPRS
-  gsmSerial.println("AT+CGATT=1");
-  delay(2000);
-
-  // Configure BSNL APN (bsnlnet)
-  gsmSerial.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"");
-  delay(1000);
-  gsmSerial.println("AT+SAPBR=3,1,\"APN\",\"bsnlnet\"");
-  delay(1000);
-  
-  // Open GPRS bearer connection to verify active data
-  gsmSerial.println("AT+SAPBR=1,1");
-  delay(3500); 
-
-  // Query IP assigned by BSNL
-  gsmSerial.println("AT+SAPBR=2,1");
-  delay(2000);
-
-  // If IP address is assigned by BSNL
-  if (gsmSerial.find("10.") || gsmSerial.find("192.") || gsmSerial.find("172.") || gsmSerial.find("+SAPBR: 1,1")) {
-    Serial.println("[SUCCESS] BSNL Internet IP assigned! Data pack is active.");
-    gsmSerial.println("AT+SAPBR=0,1");
-    delay(1000);
-    return true; 
-  } else {
-    Serial.println("[ERROR] No IP from BSNL. Data pack uncharged or expired.");
-    return false; // Triggers Wi-Fi hotspot fallback
-  }
-}
-
-void setupWiFi() {
+void triggerWiFiFallback() {
+  Serial.println("[WARNING] Switching to Wi-Fi Fallback (Infinix Hotspot)...");
+  useGSM = false;
   WiFi.begin(ssid, password);
+  
   int attempts = 0;
-  Serial.print("[WiFi] Connecting to Infinix hotspot");
-  while (WiFi.status() != WL_CONNECTED && attempts < 25) {
+  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
     delay(500);
     Serial.print(".");
     attempts++;
@@ -151,38 +128,52 @@ void setupWiFi() {
   
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\n[SUCCESS] Connected to Infinix hotspot!");
-    mqttClient.setServer(mqtt_server, mqtt_port);
+    mqttClient.setClient(wifiClient); // Point MQTT to Wi-Fi instead of GSM
   } else {
     Serial.println("\n[ERROR] Wi-Fi connection failed.");
   }
 }
 
-void reconnectWiFiMQTT() {
+void reconnectMQTT() {
   while (!mqttClient.connected()) {
     Serial.print("[MQTT] Connecting to HiveMQ...");
-    String clientId = "AutoTracker_" + String(VEHICLE_NO);
+    String clientId = "AutoTracker_" + String(VEHICLE_NO) + "_" + String(random(0xffff), HEX);
+    
     if (mqttClient.connect(clientId.c_str())) {
-      Serial.println("connected!");
+      Serial.println(" connected!");
+      gsmFailureCount = 0; // Reset failures on successful connect
     } else {
-      Serial.print("failed, state=");
+      Serial.print(" failed, state=");
       Serial.println(mqttClient.state());
-      delay(4000);
+      
+      if (useGSM) {
+        gsmFailureCount++;
+        if (gsmFailureCount >= MAX_GSM_FAILURES) {
+           Serial.println("[CRITICAL] BSNL connection dropping repeatedly.");
+           triggerWiFiFallback();
+           return;
+        }
+      }
+      delay(3000);
     }
   }
 }
 
-void sendViaGSM(String payload) {
-  bool success = true;
+void publishTelemetry(String payload) {
+  if (!mqttClient.connected()) {
+    reconnectMQTT();
+  }
   
-  if (success) {
-    gsmFailureCount = 0;
-    Serial.println("[GSM Mode] " + payload);
-  } else {
-    gsmFailureCount++;
-    if (gsmFailureCount >= MAX_GSM_FAILURES) {
-      Serial.println("[CRITICAL] BSNL data dropped. Switching to Infinix hotspot...");
-      useGSM = false;
-      setupWiFi();
+  if (mqttClient.connected()) {
+    mqttClient.loop();
+    if (mqttClient.publish(mqtt_topic, payload.c_str())) {
+      if (useGSM) {
+        Serial.println("[GSM Mode] Published: " + payload);
+      } else {
+        Serial.println("[WiFi Mode] Published: " + payload);
+      }
+    } else {
+      Serial.println("[ERROR] MQTT Publish failed.");
     }
   }
 }

@@ -25,176 +25,43 @@
       --text-muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    body, html {
-      height: 100%;
-      width: 100%;
-      background: var(--bg-dark);
-      overflow: hidden;
-    }
+    body, html { height: 100%; width: 100%; background: var(--bg-dark); overflow: hidden; }
 
-    #driverMap {
-      height: 100%;
-      width: 100%;
-      z-index: 1;
-    }
+    #driverMap { height: 100%; width: 100%; z-index: 1; }
 
-    .driver-header {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      right: 16px;
-      z-index: 1000;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      pointer-events: none;
-    }
+    .driver-header { position: absolute; top: 16px; left: 16px; right: 16px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
 
-    .driver-badge {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      padding: 10px 18px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-      pointer-events: auto;
-    }
+    .driver-badge { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 999px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); pointer-events: auto; }
 
-    .plate-badge {
-      background: var(--accent-yellow);
-      color: #000;
-      font-weight: 800;
-      font-size: 0.72rem;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
+    .plate-badge { background: var(--accent-yellow); color: #000; font-weight: 800; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; }
 
-    .duty-toggle-btn {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-      pointer-events: auto;
-      transition: all 0.3s ease;
-    }
+    .duty-toggle-btn { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); pointer-events: auto; transition: all 0.3s ease; }
 
-    .duty-toggle-btn.offline {
-      background: #475569;
-      box-shadow: none;
-    }
+    .duty-toggle-btn.offline { background: #475569; box-shadow: none; }
 
     /* Active Trip Banner */
-    .active-trip-card {
-      position: absolute;
-      bottom: 24px;
-      left: 16px;
-      right: 16px;
-      max-width: 480px;
-      margin: 0 auto;
-      z-index: 1050;
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 2px solid var(--primary);
-      border-radius: 24px;
-      padding: 20px;
-      display: none;
-      color: #fff;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-    }
+    .active-trip-card { position: absolute; bottom: 24px; left: 16px; right: 16px; max-width: 480px; margin: 0 auto; z-index: 1050; background: var(--card-bg); backdrop-filter: blur(16px); border: 2px solid var(--primary); border-radius: 24px; padding: 20px; display: none; color: #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+    
     .active-trip-card.active { display: block; }
 
-    /* Incoming Order Modal Alert (Yatri Sathi Style) */
-    .incoming-order-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(12px);
-      z-index: 3000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
+    /* Incoming Order Modal Alert */
+    .incoming-order-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+    
+    .incoming-order-overlay.active { opacity: 1; pointer-events: auto; }
 
-    .incoming-order-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .order-card { background: #0f172a; border: 2px solid var(--accent-yellow); border-radius: 26px; width: 100%; max-width: 440px; padding: 24px; color: #fff; box-shadow: 0 25px 60px rgba(250, 204, 21, 0.15); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-    .order-card {
-      background: #0f172a;
-      border: 2px solid var(--accent-yellow);
-      border-radius: 26px;
-      width: 100%;
-      max-width: 440px;
-      padding: 24px;
-      color: #fff;
-      box-shadow: 0 25px 60px rgba(250, 204, 21, 0.15);
-      transform: scale(0.8);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+    .incoming-order-overlay.active .order-card { transform: scale(1); }
 
-    /* Bounce effect when popup appears */
-    .incoming-order-overlay.active .order-card {
-      transform: scale(1);
-    }
+    .order-actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 12px; margin-top: 18px; }
 
-    .order-actions {
-      display: grid;
-      grid-template-columns: 1fr 1.6fr;
-      gap: 12px;
-      margin-top: 18px;
-    }
+    .btn-reject { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; cursor: pointer; }
 
-    .btn-reject {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-      padding: 16px;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-    }
+    .btn-accept { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); animation: pulse-btn 1.5s infinite; }
 
-    .btn-accept {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: #fff;
-      border: none;
-      padding: 16px;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-      animation: pulse-btn 1.5s infinite;
-    }
-
-    @keyframes pulse-btn {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
-    }
+    @keyframes pulse-btn { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
     .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 4000; background: #0f172a; color: #fff; border: 1px solid var(--accent-yellow); padding: 10px 18px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; max-width: 90%; text-align: center; display: none; }
   </style>
@@ -203,7 +70,6 @@
 
   <div id="driverMap"></div>
 
-  <!-- Top Bar -->
   <div class="driver-header">
     <div class="driver-badge">
       <i class="fa-solid fa-id-badge" style="color: var(--primary);"></i>
@@ -212,26 +78,36 @@
         <span class="plate-badge">WB19M3264</span>
       </div>
     </div>
-
-    <!-- STARTS OFF DUTY TO ALLOW AUDIO UNLOCK -->
     <button class="duty-toggle-btn offline" id="dutyBtn" onclick="toggleDuty()">
       <i class="fa-solid fa-moon"></i> OFF DUTY
     </button>
   </div>
 
-  <!-- Active Trip Card -->
+  <!-- Upgraded Active Trip Card -->
   <div class="active-trip-card" id="activeTripCard">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
       <span style="font-size: 0.8rem; background: var(--primary); color: #fff; font-weight: 800; padding: 2px 8px; border-radius: 4px;">ACTIVE RIDE</span>
       <span style="font-size: 0.8rem; color: var(--accent-yellow); font-weight: 700;"><span id="tripPhase">Go to pickup</span></span>
     </div>
 
-    <div style="margin-bottom: 12px;">
-      <h3 id="actPassengerName" style="font-size: 1.1rem;">Passenger Name</h3>
-      <a href="#" id="actPassengerPhone" style="color: var(--primary); font-size: 0.9rem; font-weight: 700; text-decoration: none;">📞 Phone</a>
+    <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h3 id="actPassengerName" style="font-size: 1.1rem;">Passenger Name</h3>
+        <a href="#" id="actPassengerPhone" style="color: var(--primary); font-size: 0.9rem; font-weight: 700; text-decoration: none;">📞 Phone</a>
+      </div>
+      <div style="text-align: right;">
+        <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">FARE</span>
+        <span id="actFare" style="font-size: 1.2rem; font-weight: 800; color: var(--accent-yellow);">₹0</span>
+      </div>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-top: 14px;">
+    <!-- Live Address Display Box -->
+    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 14px; font-size: 0.85rem;">
+      <div id="actDestLabel" style="color: var(--primary); margin-bottom: 4px; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px;">📍 PICKUP ADDRESS:</div>
+      <div id="actDestAddress" style="font-weight: 700; color: #fff;">--</div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
       <button style="flex: 1; background: #2563eb; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer;" id="navBtn" onclick="openNav()">
         <i class="fa-solid fa-location-arrow"></i> Navigate
       </button>
@@ -241,7 +117,7 @@
     </div>
   </div>
 
-  <!-- Incoming Order Popup (Bounces in) -->
+  <!-- Incoming Order Popup -->
   <div class="incoming-order-overlay" id="orderOverlay">
     <div class="order-card">
       <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
@@ -282,17 +158,17 @@
       attribution: 'Tiles &copy; Esri'
     }).addTo(map);
 
-    const autoMarker = L.marker([22.4837, 88.2023], {
-      icon: L.divIcon({
-        className: '',
-        html: `<div style="display:flex;flex-direction:column;align-items:center;width:80px;"><div style="background:#000;color:#facc15;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:4px;border:1px solid #facc15;">WB19M3264</div>
-               <div style="width:38px;height:38px;background:#059669;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;box-shadow:0 4px 12px rgba(0,0,0,0.4);"><i class="fa-solid fa-taxi"></i></div></div>`,
-        iconSize: [80, 50],
-        iconAnchor: [40, 45]
-      })
-    }).addTo(map);
+    // Map Markers & Routing Lines
+    const autoIcon = L.divIcon({ className: '', html: `<div style="display:flex;flex-direction:column;align-items:center;width:80px;"><div style="background:#000;color:#facc15;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:4px;border:1px solid #facc15;">WB19M3264</div><div style="width:38px;height:38px;background:#059669;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;box-shadow:0 4px 12px rgba(0,0,0,0.4);"><i class="fa-solid fa-taxi"></i></div></div>`, iconSize: [80, 50], iconAnchor: [40, 45] });
+    const pickupIcon = L.divIcon({ html: '<div style="background:#10b981;width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>', className: '', iconSize: [20,20], iconAnchor: [10,10] });
+    const dropIcon = L.divIcon({ html: '<div style="background:#ef4444;width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>', className: '', iconSize: [20,20], iconAnchor: [10,10] });
+    
+    let autoCoords = [22.4837, 88.2023];
+    let autoMarker = L.marker(autoCoords, { icon: autoIcon }).addTo(map);
+    let pickupMarker = null;
+    let dropMarker = null;
+    let tripPolyline = L.polyline([], { color: '#38bdf8', weight: 6, opacity: 0.8, dashArray: '8, 10' }).addTo(map);
 
-    // CRITICAL: Must start as false to force the driver to click "ON DUTY", unlocking the audio
     let isDutyOn = false; 
     let incomingOrder = null;
     let activeOrder = null;
@@ -300,7 +176,6 @@
     let tripStarted = false;
     let vibrationInterval = null;
 
-    // Loud, looping phone ringtone (Rapido Style)
     const ringtone = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     ringtone.loop = true;
 
@@ -315,14 +190,20 @@
       const btn = document.getElementById('dutyBtn');
       btn.classList.toggle('offline', !isDutyOn);
       btn.innerHTML = isDutyOn ? '<i class="fa-solid fa-circle-dot"></i> ON DUTY' : '<i class="fa-solid fa-moon"></i> OFF DUTY';
-      
-      // Unlock audio safely
-      if (isDutyOn) {
-        ringtone.play().then(() => {
-          ringtone.pause();
-          ringtone.currentTime = 0;
-        }).catch(e => console.log("Audio unlock required", e));
-      }
+      if (isDutyOn) ringtone.play().then(() => { ringtone.pause(); ringtone.currentTime = 0; }).catch(e => console.log(e));
+    }
+
+    // Fallback Reverse Geocoding for Driver App
+    async function getAddressFromCoords(lat, lng) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`);
+        const data = await response.json();
+        if (data && data.display_name) {
+          const parts = data.display_name.split(', ');
+          return parts.slice(0, Math.min(3, parts.length)).join(', ');
+        }
+      } catch (err) {}
+      return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     }
 
     const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt";
@@ -343,12 +224,21 @@
 
       if (topic === TOPIC_LOC) {
         const lat = parseFloat(data.lat), lng = parseFloat(data.lng);
-        if (!isNaN(lat) && !isNaN(lng)) autoMarker.setLatLng([lat, lng]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          autoCoords = [lat, lng];
+          autoMarker.setLatLng(autoCoords);
+          
+          // Update live route line dynamically while driving
+          if (activeOrder) {
+             const target = tripStarted ? activeOrder.dropRaw : activeOrder.pickupRaw;
+             tripPolyline.setLatLngs([autoCoords, target]);
+          }
+        }
       } else if (topic === TOPIC_BOOK) {
         handleBooking(data);
       } else if (topic === TOPIC_RES && data.status === "CANCELLED") {
         if (incomingOrder && incomingOrder.id === data.id) {
-          stopAlert(); // Passenger cancelled before driver answered
+          stopAlert(); 
           incomingOrder = null;
           document.getElementById('orderOverlay').classList.remove('active');
           toast("Passenger cancelled the request.");
@@ -359,11 +249,16 @@
       }
     });
 
-    function handleBooking(data) {
+    async function handleBooking(data) {
       if (!data.id || !data.name) return;
       if ((incomingOrder && incomingOrder.id === data.id) || (activeOrder && activeOrder.id === data.id)) return; 
       if (!isDutyOn) { respond({ id: data.id, status: "REJECTED", reason: "offduty" }); return; }
       if (incomingOrder || activeOrder) { respond({ id: data.id, status: "REJECTED", reason: "busy" }); return; }
+
+      // Fallback: If Passenger sent raw coordinates, Driver App translates them locally
+      const isCoords = (str) => /^[\d.-]+,\s*[\d.-]+$/.test(str);
+      if (isCoords(data.pickup)) data.pickup = await getAddressFromCoords(data.pickupRaw[0], data.pickupRaw[1]);
+      if (isCoords(data.drop)) data.drop = await getAddressFromCoords(data.dropRaw[0], data.dropRaw[1]);
 
       incomingOrder = data;
       document.getElementById('pName').innerText = data.name;
@@ -375,30 +270,27 @@
       document.getElementById('pFare').innerText = `₹${data.fare}`;
       document.getElementById('orderTime').innerText = data.time || "Just Now";
       
-      // 1. Show the bouncing popup
       document.getElementById('orderOverlay').classList.add('active');
       
-      // 2. Play continuous loud ringtone
-      ringtone.play().catch(e => console.log("Tap screen to allow audio", e));
-      
-      // 3. Heavy continuous vibration pattern (Rapido style)
-      if (navigator.vibrate) {
-        vibrationInterval = setInterval(() => { navigator.vibrate([500, 200, 500, 200]); }, 1500);
+      // Wake Screen API
+      if (window.Capacitor && window.Capacitor.Plugins.AppWaker) {
+          window.Capacitor.Plugins.AppWaker.forceToFront();
       }
+      
+      ringtone.play().catch(e => console.log(e));
+      if (navigator.vibrate) vibrationInterval = setInterval(() => { navigator.vibrate([500, 200, 500, 200]); }, 1500);
     }
 
     function stopAlert() {
       ringtone.pause();
       ringtone.currentTime = 0;
       clearInterval(vibrationInterval);
-      if (navigator.vibrate) navigator.vibrate(0); // kill vibration
+      if (navigator.vibrate) navigator.vibrate(0);
     }
 
     function driverAccept() {
       if (!incomingOrder) return;
-      
-      stopAlert(); // Silence the phone
-      
+      stopAlert(); 
       activeOrder = incomingOrder;
       incomingOrder = null;
       tripStarted = false;
@@ -409,16 +301,31 @@
       document.getElementById('actPassengerName').innerText = activeOrder.name;
       document.getElementById('actPassengerPhone').innerText = `📞 ${activeOrder.phone}`;
       document.getElementById('actPassengerPhone').href = `tel:${activeOrder.phone}`;
+      document.getElementById('actFare').innerText = `₹${activeOrder.fare}`;
+      
+      // Set Card to Display Pickup Address
+      document.getElementById('actDestLabel').innerText = "📍 PICKUP ADDRESS:";
+      document.getElementById('actDestLabel').style.color = "var(--primary)";
+      document.getElementById('actDestAddress').innerText = activeOrder.pickup;
+
       document.getElementById('tripPhase').innerText = "Go to pickup";
       document.getElementById('navBtn').innerHTML = '<i class="fa-solid fa-location-arrow"></i> Navigate to Pickup';
       document.getElementById('mainBtn').innerText = "Start Trip (enter OTP)";
       document.getElementById('activeTripCard').classList.add('active');
+
+      // Drop Map Pins and Draw Route
+      if (pickupMarker) map.removeLayer(pickupMarker);
+      if (dropMarker) map.removeLayer(dropMarker);
+      pickupMarker = L.marker(activeOrder.pickupRaw, { icon: pickupIcon }).addTo(map);
+      dropMarker = L.marker(activeOrder.dropRaw, { icon: dropIcon }).addTo(map);
+      tripPolyline.setLatLngs([autoCoords, activeOrder.pickupRaw]);
+      map.fitBounds(tripPolyline.getBounds(), { padding: [60, 60] });
+
       openNav();
     }
 
     function driverReject() {
-      stopAlert(); // Silence the phone
-      
+      stopAlert(); 
       if (incomingOrder) respond({ id: incomingOrder.id, status: "REJECTED", reason: "declined" });
       incomingOrder = null;
       document.getElementById('orderOverlay').classList.remove('active');
@@ -430,11 +337,8 @@
       if (!activeOrder) return;
       const pt = tripStarted ? activeOrder.dropRaw : activeOrder.pickupRaw;
       const label = tripStarted ? activeOrder.drop : activeOrder.pickup;
-      if (validPoint(pt)) {
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${pt[0]},${pt[1]}`, '_blank');
-      } else {
-        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(label)}`, '_blank');
-      }
+      if (validPoint(pt)) window.open(`https://www.google.com/maps/dir/?api=1&destination=${pt[0]},${pt[1]}`, '_blank');
+      else window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(label)}`, '_blank');
     }
 
     function mainAction() {
@@ -445,9 +349,20 @@
         if (code.trim() !== currentOtp) { toast("Wrong OTP. Ask the passenger again."); return; }
         tripStarted = true;
         respond({ id: activeOrder.id, status: "STARTED" });
+        
+        // Update Card to Display Drop Address
         document.getElementById('tripPhase').innerText = "Trip in progress";
+        document.getElementById('actDestLabel').innerText = "🏁 DROP DESTINATION:";
+        document.getElementById('actDestLabel').style.color = "var(--danger)";
+        document.getElementById('actDestAddress').innerText = activeOrder.drop;
+
         document.getElementById('navBtn').innerHTML = '<i class="fa-solid fa-location-arrow"></i> Navigate to Drop';
         document.getElementById('mainBtn').innerText = "Complete Ride";
+        
+        // Update Map Route Line
+        tripPolyline.setLatLngs([autoCoords, activeOrder.dropRaw]);
+        map.fitBounds(tripPolyline.getBounds(), { padding: [60, 60] });
+        
         openNav();
       } else if (confirm("Complete trip and collect fare?")) {
         respond({ id: activeOrder.id, status: "COMPLETED" });
@@ -460,6 +375,9 @@
       activeOrder = null;
       currentOtp = null;
       tripStarted = false;
+      tripPolyline.setLatLngs([]);
+      if (pickupMarker) map.removeLayer(pickupMarker);
+      if (dropMarker) map.removeLayer(dropMarker);
     }
   </script>
 </body>

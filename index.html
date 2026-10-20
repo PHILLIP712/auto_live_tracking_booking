@@ -26,382 +26,65 @@
       --text-muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body, html {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background-color: #000;
-    }
-
-    #map {
-      height: 100%;
-      width: 100%;
-      z-index: 1;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body, html { height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+    #map { height: 100%; width: 100%; z-index: 1; }
 
     /* Top Bar */
-    .top-bar {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      right: 16px;
-      z-index: 1000;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      pointer-events: none;
-    }
-
-    .brand-pill {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      padding: 8px 16px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      pointer-events: auto;
-    }
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #10b981, #059669);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 1.1rem;
-    }
-
-    .brand-text h1 {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .plate-badge {
-      font-size: 0.68rem;
-      background: var(--accent-yellow);
-      color: #000;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 4px;
-    }
-
-    .status-badge {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-main);
-      pointer-events: auto;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--primary);
-      box-shadow: 0 0 10px var(--primary);
-      animation: pulse-dot 1.8s infinite;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
+    .top-bar { position: absolute; top: 16px; left: 16px; right: 16px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+    .brand-pill { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 999px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); pointer-events: auto; }
+    .brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; }
+    .brand-text h1 { font-size: 0.95rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+    .plate-badge { font-size: 0.68rem; background: var(--accent-yellow); color: #000; font-weight: 800; padding: 2px 7px; border-radius: 4px; }
+    
+    .status-badge { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-main); pointer-events: auto; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 10px var(--primary); animation: pulse-dot 1.8s infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
 
     /* Live Tracking Bottom Card */
-    .ride-status-card {
-      position: absolute;
-      bottom: 24px;
-      left: 16px;
-      right: 16px;
-      max-width: 480px;
-      margin: 0 auto;
-      z-index: 1050;
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 2px solid var(--accent-blue);
-      border-radius: 24px;
-      padding: 20px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-      display: none;
-      animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
+    .ride-status-card { position: absolute; bottom: 24px; left: 16px; right: 16px; max-width: 480px; margin: 0 auto; z-index: 1050; background: var(--card-bg); backdrop-filter: blur(16px); border: 2px solid var(--accent-blue); border-radius: 24px; padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.7); display: none; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     .ride-status-card.active { display: block; }
-
-    @keyframes slideUp {
-      from { transform: translateY(50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .otp-badge {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid var(--accent-blue);
-      color: var(--accent-blue);
-      font-size: 0.9rem;
-      font-weight: 800;
-      padding: 4px 12px;
-      border-radius: 8px;
-      letter-spacing: 2px;
-    }
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .otp-badge { background: rgba(56, 189, 248, 0.15); border: 1px solid var(--accent-blue); color: var(--accent-blue); font-size: 0.9rem; font-weight: 800; padding: 4px 12px; border-radius: 8px; letter-spacing: 2px; }
 
     /* Standard Bottom Bar */
-    .bottom-bar {
-      position: absolute;
-      bottom: 24px;
-      left: 16px;
-      right: 16px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    .primary-book-btn {
-      width: 100%;
-      max-width: 480px;
-      background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
-      color: #000;
-      border: none;
-      padding: 16px;
-      border-radius: 16px;
-      font-size: 1rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 0 10px 25px rgba(234, 179, 8, 0.4);
-      pointer-events: auto;
-    }
+    .bottom-bar { position: absolute; bottom: 24px; left: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
+    .primary-book-btn { width: 100%; max-width: 480px; background: linear-gradient(135deg, #facc15 0%, #eab308 100%); color: #000; border: none; padding: 16px; border-radius: 16px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 25px rgba(234, 179, 8, 0.4); pointer-events: auto; }
 
     /* Helper Top Banner */
-    .pin-helper-banner {
-      position: absolute;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1050;
-      background: var(--bg-dark);
-      border: 2px solid var(--accent-yellow);
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 10px 20px;
-      border-radius: 999px;
-      display: none;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      pointer-events: auto;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .pin-helper-banner { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1050; background: var(--bg-dark); border: 2px solid var(--accent-yellow); color: #fff; font-size: 0.8rem; font-weight: 700; padding: 10px 20px; border-radius: 999px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: auto; align-items: center; gap: 10px; }
     .pin-helper-banner.active { display: flex; }
-
-    .done-pin-btn {
-      background: var(--accent-yellow);
-      color: #000;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: 800;
-      cursor: pointer;
-      font-size: 0.72rem;
-    }
+    .done-pin-btn { background: var(--accent-yellow); color: #000; border: none; padding: 4px 10px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 0.72rem; }
 
     /* Booking Sheet Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(8px);
-      z-index: 2000;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .booking-sheet {
-      background: var(--bg-dark);
-      border-top: 1px solid var(--border-color);
-      width: 100%;
-      max-width: 520px;
-      border-radius: 28px 28px 0 0;
-      padding: 24px;
-      box-shadow: 0 -10px 45px rgba(0,0,0,0.6);
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      max-height: 92vh;
-      overflow-y: auto;
-    }
-
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .booking-sheet { background: var(--bg-dark); border-top: 1px solid var(--border-color); width: 100%; max-width: 520px; border-radius: 28px 28px 0 0; padding: 24px; box-shadow: 0 -10px 45px rgba(0,0,0,0.6); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 92vh; overflow-y: auto; }
     .modal-overlay.active .booking-sheet { transform: translateY(0); }
+    .sheet-handle { width: 42px; height: 4px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; margin: 0 auto 16px; }
+    .sheet-title { font-size: 1.15rem; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between; }
 
-    .sheet-handle {
-      width: 42px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.25);
-      border-radius: 2px;
-      margin: 0 auto 16px;
-    }
-
-    .sheet-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--text-main);
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .gps-locate-btn {
-      width: 100%;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1.5px solid var(--primary);
-      color: var(--primary);
-      padding: 11px 14px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin: 12px 0;
-    }
-
-    .location-pick-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .pick-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px dashed var(--border-color);
-      color: var(--text-main);
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 0.72rem;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .pick-btn.active {
-      border-color: var(--accent-yellow);
-      background: rgba(250, 204, 21, 0.12);
-    }
+    .gps-locate-btn { width: 100%; background: rgba(16, 185, 129, 0.12); border: 1.5px solid var(--primary); color: var(--primary); padding: 11px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0; }
+    .location-pick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .pick-btn { background: rgba(255, 255, 255, 0.04); border: 1px dashed var(--border-color); color: var(--text-main); padding: 12px; border-radius: 12px; font-size: 0.72rem; cursor: pointer; text-align: left; }
+    .pick-btn.active { border-color: var(--accent-yellow); background: rgba(250, 204, 21, 0.12); }
 
     .input-box { margin-bottom: 12px; }
+    .input-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: block; }
+    .input-field { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; color: #fff; font-size: 0.88rem; outline: none; }
 
-    .input-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      display: block;
-    }
+    .fare-card { background: rgba(250, 204, 21, 0.08); border: 1px solid rgba(250, 204, 21, 0.25); border-radius: 14px; padding: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 
-    .input-field {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-color);
-      padding: 12px;
-      border-radius: 12px;
-      color: #fff;
-      font-size: 0.88rem;
-      outline: none;
-    }
-
-    .fare-card {
-      background: rgba(250, 204, 21, 0.08);
-      border: 1px solid rgba(250, 204, 21, 0.25);
-      border-radius: 14px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    /* Auto Marker */
-    .custom-auto-marker {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .marker-label-tag {
-      background: #000;
-      color: var(--accent-yellow);
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid var(--accent-yellow);
-      white-space: nowrap;
-    }
-
+    .custom-auto-marker { display: flex; flex-direction: column; align-items: center; }
+    .marker-label-tag { background: #000; color: var(--accent-yellow); font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--accent-yellow); white-space: nowrap; }
+    .marker-core { width: 38px; height: 38px; background: #059669; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-top: 2px; }
     .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 4000; background: #0f172a; color: #fff; border: 1px solid var(--accent-yellow); padding: 10px 18px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; max-width: 90%; text-align: center; display: none; }
-    
-    .marker-core {
-      width: 38px;
-      height: 38px;
-      background: #059669;
-      border: 2px solid #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      margin-top: 2px;
-    }
   </style>
 </head>
 <body>
 
   <div id="map"></div>
 
-  <!-- Top Bar -->
   <div class="top-bar">
     <div class="brand-pill">
       <div class="brand-icon"><i class="fa-solid fa-taxi"></i></div>
@@ -415,20 +98,17 @@
     </div>
   </div>
 
-  <!-- Map Selection Mode Banner -->
   <div class="pin-helper-banner" id="pinHelperBanner">
     <span id="pinHelperText">📍 Tap map to set Pickup point</span>
     <button class="done-pin-btn" onclick="openBookingSheet()">Open Form</button>
   </div>
 
-  <!-- Initial Booking Button Bar -->
   <div class="bottom-bar" id="bookingBar">
     <button class="primary-book-btn" onclick="openBookingSheet()">
       <i class="fa-solid fa-route"></i> Book Auto Ride (WB19M3264)
     </button>
   </div>
 
-  <!-- Live Pickup Tracking Card -->
   <div class="ride-status-card" id="rideStatusCard">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
       <div>
@@ -507,6 +187,12 @@
           <input type="text" class="input-field" id="dropLandmark" placeholder="Fetching address..." required>
         </div>
 
+        <!-- NEW: Schedule Ride Field -->
+        <div class="input-box">
+          <label class="input-label">Schedule Time (Optional for Later)</label>
+          <input type="datetime-local" class="input-field" id="scheduleTime" style="color-scheme: dark;">
+        </div>
+
         <div class="fare-card">
           <div>
             <div style="font-size: 0.72rem; color: var(--text-muted);">Trip Distance</div>
@@ -549,10 +235,8 @@
     let driverToPickupLine = L.polyline([], { color: '#38bdf8', weight: 6, opacity: 0.9, dashArray: '8, 10' }).addTo(map);
 
     let autoCoords = [22.4837, 88.2023];
-    let pickupMarker = null;
-    let dropMarker = null;
-    let pickupCoords = null;
-    let dropCoords = null;
+    let pickupMarker = null, dropMarker = null;
+    let pickupCoords = null, dropCoords = null;
     let pinSelectMode = null;
     let currentTripDistance = 0;
     let calculatedFare = 20;
@@ -560,54 +244,37 @@
 
     const successChime = new Audio('https://assets.mixkit.co/active_storage/sfx/1123/1123-preview.mp3');
 
-    // --- REVERSE GEOCODING FUNCTION (Coordinates to Street Address) ---
     async function reverseGeocode(lat, lng, textElementId, inputElementId) {
       document.getElementById(textElementId).innerText = "Loading address...";
       document.getElementById(inputElementId).value = "Loading address...";
-      
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`);
-        const data = await response.json();
-        
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`);
+        const data = await res.json();
         if (data && data.display_name) {
-          // Shorten the address to the first 3 elements (e.g., Street Name, Neighborhood, City)
-          const parts = data.display_name.split(', ');
-          const shortAddr = parts.slice(0, Math.min(3, parts.length)).join(', ');
-          
+          const shortAddr = data.display_name.split(', ').slice(0, 3).join(', ');
           document.getElementById(textElementId).innerText = shortAddr;
           document.getElementById(inputElementId).value = shortAddr;
           return;
         }
-      } catch (err) {
-        console.log("Geocoding failed", err);
-      }
-      
-      // Fallback if API fails: show coordinates
-      const fallbackText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      document.getElementById(textElementId).innerText = fallbackText;
-      document.getElementById(inputElementId).value = fallbackText;
+      } catch (e) {}
+      const fallback = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      document.getElementById(textElementId).innerText = fallback;
+      document.getElementById(inputElementId).value = fallback;
     }
 
-    // --- GPS Location ---
     function useCurrentLocationForPickup() {
-      if (!navigator.geolocation) {
-        alert("Geolocation not supported.");
-        return;
-      }
+      if (!navigator.geolocation) { alert("Geolocation not supported."); return; }
       navigator.geolocation.getCurrentPosition((pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
         pickupCoords = [lat, lng];
 
         if (pickupMarker) map.removeLayer(pickupMarker);
         pickupMarker = L.marker([lat, lng], {
           draggable: true,
-          icon: L.divIcon({ html: '<div style="background:#10b981;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px #10b981;"></div>', iconSize: [24, 24], iconAnchor: [12, 12] })
+          icon: L.divIcon({ html: '<div style="background:#10b981;width:24px;height:24px;border-radius:50%;border:3px solid #fff;"></div>', iconSize: [24, 24], iconAnchor: [12, 12] })
         }).addTo(map).bindPopup("📍 Your Pickup").openPopup();
 
-        // Convert the GPS coordinates to a real address instantly
         reverseGeocode(lat, lng, 'pickupText', 'pickupLandmark');
-
         pickupMarker.on('dragend', (e) => {
           pickupCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
           reverseGeocode(pickupCoords[0], pickupCoords[1], 'pickupText', 'pickupLandmark');
@@ -617,14 +284,11 @@
         map.setView([lat, lng], 16);
         document.getElementById('btnSetPickup').classList.remove('active');
         document.getElementById('btnSetDrop').classList.add('active');
-
         if (!dropCoords) startPinSelection('drop');
         else updateTripRoute();
-      }, () => toast("Couldn't get your location. Allow location access or pick on the map."),
-      { enableHighAccuracy: true, timeout: 10000 });
+      }, () => toast("Couldn't get location."), { enableHighAccuracy: true, timeout: 10000 });
     }
 
-    // --- Map Pin Drop ---
     function startPinSelection(mode) {
       pinSelectMode = mode;
       closeBookingSheet();
@@ -635,34 +299,27 @@
 
     map.on('click', (e) => {
       if (!pinSelectMode) return;
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
+      const lat = e.latlng.lat, lng = e.latlng.lng;
 
       if (pinSelectMode === 'pickup') {
         pickupCoords = [lat, lng];
         if (pickupMarker) map.removeLayer(pickupMarker);
         pickupMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
-        
         reverseGeocode(lat, lng, 'pickupText', 'pickupLandmark');
-
         pickupMarker.on('dragend', (evt) => {
           pickupCoords = [evt.target.getLatLng().lat, evt.target.getLatLng().lng];
           reverseGeocode(pickupCoords[0], pickupCoords[1], 'pickupText', 'pickupLandmark');
           updateTripRoute();
         });
-        
         if (!dropCoords) {
           pinSelectMode = 'drop';
           document.getElementById('pinHelperText').innerText = "🏁 Now tap map to set DROP point";
         } else finishPinSelection();
-        
       } else if (pinSelectMode === 'drop') {
         dropCoords = [lat, lng];
         if (dropMarker) map.removeLayer(dropMarker);
         dropMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
-        
         reverseGeocode(lat, lng, 'dropText', 'dropLandmark');
-
         dropMarker.on('dragend', (evt) => {
           dropCoords = [evt.target.getLatLng().lat, evt.target.getLatLng().lng];
           reverseGeocode(dropCoords[0], dropCoords[1], 'dropText', 'dropLandmark');
@@ -679,12 +336,14 @@
       openBookingSheet();
     }
 
+    // Upgraded Distance Calculation with 1.5x Road Curvature Multiplier
     function calcDist(p1, p2) {
       const R = 6371;
       const dLat = (p2[0] - p1[0]) * Math.PI / 180;
       const dLng = (p2[1] - p1[1]) * Math.PI / 180;
       const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(p1[0] * Math.PI / 180) * Math.cos(p2[0] * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
-      return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(2);
+      const straightLine = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return (straightLine * 1.5).toFixed(1);
     }
 
     function updateTripRoute() {
@@ -701,9 +360,9 @@
     function updateDriverPickupRoute(fit = false) {
       if (isRideActive && pickupCoords) {
         driverToPickupLine.setLatLngs([autoCoords, pickupCoords]);
-        const distToPickup = calcDist(autoCoords, pickupCoords);
-        document.getElementById('hudPickupDist').innerText = `${distToPickup} km away`;
-        const etaMins = Math.max(1, Math.round((distToPickup / 20) * 60));
+        const dist = calcDist(autoCoords, pickupCoords);
+        document.getElementById('hudPickupDist').innerText = `${dist} km away`;
+        const etaMins = Math.max(1, Math.round((dist / 20) * 60));
         document.getElementById('hudPickupEta').innerText = `~${etaMins} mins`;
         if (fit) map.fitBounds(driverToPickupLine.getBounds(), { padding: [70, 70] });
       }
@@ -715,12 +374,20 @@
     const TOPIC_BOOK = TOPIC_ROOT + "/booking";
     const TOPIC_RES  = TOPIC_ROOT + "/response";
 
-    const TELEGRAM_BOT_TOKEN = "PASTE_NEW_BOT_TOKEN";
-    const TELEGRAM_CHAT_ID   = "PASTE_CHAT_ID";
+    const mqttOptions = { 
+        reconnectPeriod: 3000,
+        keepalive: 30,
+        clientId: 'cholo_passenger_' + Math.random().toString(16).substr(2, 8)
+    };
+    const mqttClient = mqtt.connect(MQTT_BROKER, mqttOptions);
 
-    let currentBookingId = null;   
-    let pendingTimer = null;
-    let lastLocTime = 0;
+    if (window.Capacitor && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.addListener('appStateChange', ({ isActive }) => {
+            if (isActive && !mqttClient.connected) mqttClient.reconnect();
+        });
+    }
+
+    let currentBookingId = null, pendingTimer = null, lastLocTime = 0;
 
     function toast(msg) {
       const t = document.getElementById('toast');
@@ -728,8 +395,6 @@
       clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 4000);
     }
     function setStatus(txt) { document.getElementById('vehicleStatusText').innerText = txt; }
-
-    const mqttClient = mqtt.connect(MQTT_BROKER, { reconnectPeriod: 3000 });
 
     mqttClient.on('connect', () => {
       mqttClient.subscribe([TOPIC_LOC, TOPIC_RES]);
@@ -761,7 +426,7 @@
           document.getElementById('rideTitle').innerText = "Cholo Auto is on the way!";
           document.getElementById('hudOtp').innerText = data.otp;
           setStatus("Driver Arriving");
-          successChime.play().catch(e => console.log(e));
+          successChime.play().catch(e => {});
           if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
           updateDriverPickupRoute(true);
         } else if (data.status === "STARTED") {
@@ -776,15 +441,14 @@
           toast("🏁 Ride completed! Thank you.");
         } else if (data.status === "REJECTED") {
           resetCustomerView();
-          toast(data.reason === "offduty" ? "Driver is off duty right now." : data.reason === "busy" ? "Driver is busy. Try again." : "Driver couldn't take this ride.");
+          toast("Driver declined or is busy. Try again.");
         }
       }
     });
 
     function resetCustomerView() {
       clearTimeout(pendingTimer);
-      currentBookingId = null;
-      isRideActive = false;
+      currentBookingId = null; isRideActive = false;
       driverToPickupLine.setLatLngs([]);
       document.getElementById('rideStatusCard').classList.remove('active');
       document.getElementById('bookingBar').style.display = 'flex';
@@ -804,7 +468,7 @@
     function submitRideRequest(e) {
       e.preventDefault();
       if (currentBookingId) return;
-      if (!pickupCoords || !dropCoords) { toast("Set Pickup and Drop points on the map."); return; }
+      if (!pickupCoords || !dropCoords) { toast("Set Pickup and Drop points on map."); return; }
       if (!mqttClient.connected) { toast("Not connected. Try again."); return; }
 
       successChime.play().then(() => { successChime.pause(); successChime.currentTime = 0; }).catch(() => {});
@@ -813,18 +477,21 @@
       const phone = document.getElementById('custPhone').value.replace(/[\s-]/g, '');
       const pLandmark = document.getElementById('pickupLandmark').value.trim();
       const dLandmark = document.getElementById('dropLandmark').value.trim();
+      const scheduleVal = document.getElementById('scheduleTime').value;
 
       const orderPayload = {
         id: 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         name: name,
         phone: phone,
-        pickup: pLandmark, // Now automatically filled with a real address!
-        drop: dLandmark,   // Now automatically filled with a real address!
+        pickup: pLandmark, 
+        drop: dLandmark,   
         pickupRaw: pickupCoords,
         dropRaw: dropCoords,
         distance: Number(currentTripDistance),
         fare: calculatedFare,
-        time: new Date().toLocaleTimeString()
+        time: new Date().toLocaleTimeString(),
+        isScheduled: Boolean(scheduleVal),
+        scheduleTime: scheduleVal || "Immediate"
       };
 
       currentBookingId = orderPayload.id;
@@ -832,22 +499,24 @@
 
       closeBookingSheet();
       document.getElementById('bookingBar').style.display = 'none';
-      document.getElementById('rideTitle').innerText = "Waiting for driver...";
+      document.getElementById('rideTitle').innerText = scheduleVal ? "Ride Scheduled Successfully" : "Waiting for driver...";
       document.getElementById('hudOtp').innerText = "----";
-      document.getElementById('hudPickupDist').innerText = "--";
-      document.getElementById('hudPickupEta').innerText = "--";
+      document.getElementById('hudPickupDist').innerText = scheduleVal ? "Saved to Queue" : "--";
+      document.getElementById('hudPickupEta').innerText = scheduleVal ? scheduleVal : "--";
       document.getElementById('hudFare').innerText = `₹${calculatedFare}`;
       document.getElementById('rideStatusCard').classList.add('active');
-      setStatus("Request sent");
+      setStatus(scheduleVal ? "Scheduled" : "Request sent");
 
-      clearTimeout(pendingTimer);
-      pendingTimer = setTimeout(() => {
-        if (currentBookingId && !isRideActive) {
-          mqttClient.publish(TOPIC_RES, JSON.stringify({ id: currentBookingId, status: "CANCELLED" }), { qos: 1 });
-          resetCustomerView();
-          toast("No response from driver.");
-        }
-      }, 90000);
+      if (!scheduleVal) {
+        clearTimeout(pendingTimer);
+        pendingTimer = setTimeout(() => {
+          if (currentBookingId && !isRideActive) {
+            mqttClient.publish(TOPIC_RES, JSON.stringify({ id: currentBookingId, status: "CANCELLED" }), { qos: 1 });
+            resetCustomerView();
+            toast("No response from driver.");
+          }
+        }, 90000);
+      }
     }
   </script>
 </body>

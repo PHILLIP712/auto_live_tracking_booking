@@ -4,229 +4,113 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cholo Auto - EV WB19M3264</title>
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
   <style>
-    :root {
-      --primary: #10b981;
-      --primary-dark: #059669;
-      --accent-yellow: #facc15;
-      --accent-blue: #38bdf8;
-      --danger: #ef4444;
-      --bg-dark: #0f172a;
-      --card-bg: rgba(15, 23, 42, 0.92);
-      --border-color: rgba(255, 255, 255, 0.12);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
+    :root { --primary: #10b981; --primary-dark: #059669; --accent-yellow: #facc15; --accent-blue: #38bdf8; --danger: #ef4444; --bg-dark: #0f172a; --card-bg: rgba(15, 23, 42, 0.92); --border-color: rgba(255, 255, 255, 0.12); --text-main: #f8fafc; --text-muted: #94a3b8; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-
     body, html { height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-
     #map { height: 100%; width: 100%; z-index: 1; }
-
-    /* Top Bar */
     .top-bar { position: absolute; top: 16px; left: 16px; right: 16px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
-
     .brand-pill { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 999px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); pointer-events: auto; }
-
     .brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; }
-
     .brand-text h1 { font-size: 0.95rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
-
     .plate-badge { font-size: 0.68rem; background: var(--accent-yellow); color: #000; font-weight: 800; padding: 2px 7px; border-radius: 4px; }
-
     .status-badge { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-main); pointer-events: auto; }
-
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 10px var(--primary); animation: pulse-dot 1.8s infinite; }
-
     @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
-
-    /* Live Tracking Bottom Card */
     .ride-status-card { position: absolute; bottom: 24px; left: 16px; right: 16px; max-width: 480px; margin: 0 auto; z-index: 1050; background: var(--card-bg); backdrop-filter: blur(16px); border: 2px solid var(--accent-blue); border-radius: 24px; padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.7); display: none; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
-
     .ride-status-card.active { display: block; }
-
     @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
     .otp-badge { background: rgba(56, 189, 248, 0.15); border: 1px solid var(--accent-blue); color: var(--accent-blue); font-size: 0.9rem; font-weight: 800; padding: 4px 12px; border-radius: 8px; letter-spacing: 2px; }
-
-    /* Standard Bottom Bar */
     .bottom-bar { position: absolute; bottom: 24px; left: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
-
     .primary-book-btn { width: 100%; max-width: 480px; background: linear-gradient(135deg, #facc15 0%, #eab308 100%); color: #000; border: none; padding: 16px; border-radius: 16px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 25px rgba(234, 179, 8, 0.4); pointer-events: auto; }
-
-    /* Helper Top Banner */
     .pin-helper-banner { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1050; background: var(--bg-dark); border: 2px solid var(--accent-yellow); color: #fff; font-size: 0.8rem; font-weight: 700; padding: 10px 20px; border-radius: 999px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: auto; align-items: center; gap: 10px; }
-
     .pin-helper-banner.active { display: flex; }
-
     .done-pin-btn { background: var(--accent-yellow); color: #000; border: none; padding: 4px 10px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 0.72rem; }
-
-    /* Booking Sheet Modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
-
     .booking-sheet { background: var(--bg-dark); border-top: 1px solid var(--border-color); width: 100%; max-width: 520px; border-radius: 28px 28px 0 0; padding: 24px; box-shadow: 0 -10px 45px rgba(0,0,0,0.6); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 92vh; overflow-y: auto; }
-
     .modal-overlay.active .booking-sheet { transform: translateY(0); }
-
     .sheet-handle { width: 42px; height: 4px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; margin: 0 auto 16px; }
-
-    .sheet-title { font-size: 1.15rem; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between; }
-
-    .gps-locate-btn { width: 100%; background: rgba(16, 185, 129, 0.12); border: 1.5px solid var(--primary); color: var(--primary); padding: 11px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0; }
-
+    .sheet-title { font-size: 1.15rem; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .gps-locate-btn { width: 100%; background: rgba(16, 185, 129, 0.12); border: 1.5px solid var(--primary); color: var(--primary); padding: 11px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 14px; }
     .location-pick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-
     .pick-btn { background: rgba(255, 255, 255, 0.04); border: 1px dashed var(--border-color); color: var(--text-main); padding: 12px; border-radius: 12px; font-size: 0.72rem; cursor: pointer; text-align: left; }
-
     .pick-btn.active { border-color: var(--accent-yellow); background: rgba(250, 204, 21, 0.12); }
-
     .input-box { margin-bottom: 12px; }
-
     .input-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: block; }
-
     .input-field { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; color: #fff; font-size: 0.88rem; outline: none; }
-
     .fare-card { background: rgba(250, 204, 21, 0.08); border: 1px solid rgba(250, 204, 21, 0.25); border-radius: 14px; padding: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-
-    /* Auto Marker */
     .custom-auto-marker { display: flex; flex-direction: column; align-items: center; }
-
     .marker-label-tag { background: #000; color: var(--accent-yellow); font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--accent-yellow); white-space: nowrap; }
-
     .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 4000; background: #0f172a; color: #fff; border: 1px solid var(--accent-yellow); padding: 10px 18px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; max-width: 90%; text-align: center; display: none; }
-    
     .marker-core { width: 38px; height: 38px; background: #059669; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-top: 2px; }
   </style>
 </head>
 <body>
 
   <div id="map"></div>
-
-  <!-- Top Bar -->
   <div class="top-bar">
-    <div class="brand-pill">
-      <div class="brand-icon"><i class="fa-solid fa-taxi"></i></div>
-      <div class="brand-text">
-        <h1>Cholo Auto <span class="plate-badge">WB19M3264</span></h1>
-      </div>
-    </div>
-    <div class="status-badge">
-      <span class="status-dot"></span>
-      <span id="vehicleStatusText">Tracking Live</span>
-    </div>
+    <div class="brand-pill"><div class="brand-icon"><i class="fa-solid fa-taxi"></i></div><div class="brand-text"><h1>Cholo Auto <span class="plate-badge">WB19M3264</span></h1></div></div>
+    <div class="status-badge"><span class="status-dot"></span><span id="vehicleStatusText">Tracking Live</span></div>
   </div>
-
-  <!-- Map Selection Mode Banner -->
   <div class="pin-helper-banner" id="pinHelperBanner">
-    <span id="pinHelperText">📍 Tap map to set Pickup point</span>
-    <button class="done-pin-btn" onclick="openBookingSheet()">Open Form</button>
+    <span id="pinHelperText">📍 Tap map to set Pickup point</span><button class="done-pin-btn" onclick="openBookingSheet()">Open Form</button>
   </div>
-
-  <!-- Initial Booking Button Bar -->
   <div class="bottom-bar" id="bookingBar">
-    <button class="primary-book-btn" onclick="openBookingSheet()">
-      <i class="fa-solid fa-route"></i> Book Auto Ride (WB19M3264)
-    </button>
+    <button class="primary-book-btn" onclick="openBookingSheet()"><i class="fa-solid fa-route"></i> Book Auto Ride (WB19M3264)</button>
   </div>
-
-  <!-- Live Pickup Tracking Card -->
   <div class="ride-status-card" id="rideStatusCard">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-      <div>
-        <h3 id="rideTitle" style="color: #fff; font-size: 1.1rem; font-weight: 800;">Waiting for driver...</h3>
-        <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 2px;">
-          Electric Auto <span class="plate-badge">WB19M3264</span>
-        </p>
-      </div>
-      <div>
-        <span style="font-size: 0.65rem; color: var(--text-muted); display: block; text-align: right; margin-bottom: 2px;">RIDE OTP</span>
-        <span class="otp-badge" id="hudOtp">----</span>
-      </div>
+      <div><h3 id="rideTitle" style="color: #fff; font-size: 1.1rem; font-weight: 800;">Waiting for driver...</h3><p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 2px;">Electric Auto <span class="plate-badge">WB19M3264</span></p></div>
+      <div><span style="font-size: 0.65rem; color: var(--text-muted); display: block; text-align: right; margin-bottom: 2px;">RIDE OTP</span><span class="otp-badge" id="hudOtp">----</span></div>
     </div>
     <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 14px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-      <div>
-        <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Pickup Distance</span>
-        <strong style="color: var(--accent-blue); font-size: 1.1rem;" id="hudPickupDist">Calculating...</strong>
-      </div>
-      <div>
-        <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Est. Arrival (ETA)</span>
-        <strong style="color: #fff; font-size: 1.1rem;" id="hudPickupEta">~-- mins</strong>
-      </div>
+      <div><span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Pickup Distance</span><strong style="color: var(--accent-blue); font-size: 1.1rem;" id="hudPickupDist">Calculating...</strong></div>
+      <div><span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Est. Arrival (ETA)</span><strong style="color: #fff; font-size: 1.1rem;" id="hudPickupEta">~-- mins</strong></div>
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <span style="font-size: 0.8rem; color: var(--text-muted);">Total Trip Fare: <strong style="color: var(--accent-yellow);" id="hudFare">₹0</strong></span>
-      <button style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; cursor: pointer;" onclick="cancelActiveRide()">
-        Cancel Ride
-      </button>
+      <button style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; cursor: pointer;" onclick="cancelActiveRide()">Cancel Ride</button>
     </div>
   </div>
 
-  <!-- Booking Sheet Modal -->
   <div class="modal-overlay" id="bookingOverlay">
     <div class="booking-sheet">
       <div class="sheet-handle"></div>
-      
-      <div class="sheet-title">
-        <span>Request Ride</span>
-        <span class="plate-badge">WB19M3264</span>
+      <div class="sheet-title"><span>Request Ride</span><span class="plate-badge">WB19M3264</span></div>
+      <div class="input-box" style="display: flex; gap: 10px;">
+        <label style="flex: 1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; font-size: 0.8rem; border: 1px solid var(--border-color); text-align: center; cursor: pointer; color: #fff;">
+          <input type="radio" name="tripType" value="one_way" checked onchange="updateTripRoute()"> One Way ➡️
+        </label>
+        <label style="flex: 1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; font-size: 0.8rem; border: 1px solid var(--border-color); text-align: center; cursor: pointer; color: #fff;">
+          <input type="radio" name="tripType" value="round_trip" onchange="updateTripRoute()"> Round Trip 🔄
+        </label>
       </div>
-
-      <button type="button" class="gps-locate-btn" onclick="useCurrentLocationForPickup()">
-        <i class="fa-solid fa-location-crosshairs"></i> Use My Current Location for Pickup
-      </button>
-
+      <button type="button" class="gps-locate-btn" onclick="useCurrentLocationForPickup()"><i class="fa-solid fa-location-crosshairs"></i> Use My Current Location for Pickup</button>
       <div class="location-pick-row">
-        <button type="button" class="pick-btn active" id="btnSetPickup" onclick="startPinSelection('pickup')">
-          <strong style="color: var(--primary);">● 1. Set Pickup Point</strong>
-          <div id="pickupText" style="color: var(--text-muted); font-size: 0.72rem; margin-top: 4px;">Tap to select on map</div>
-        </button>
-
-        <button type="button" class="pick-btn" id="btnSetDrop" onclick="startPinSelection('drop')">
-          <strong style="color: var(--danger);">● 2. Set Drop Point</strong>
-          <div id="dropText" style="color: var(--text-muted); font-size: 0.72rem; margin-top: 4px;">Tap to select on map</div>
-        </button>
+        <button type="button" class="pick-btn active" id="btnSetPickup" onclick="startPinSelection('pickup')"><strong style="color: var(--primary);">● 1. Set Pickup Point</strong><div id="pickupText" style="color: var(--text-muted); font-size: 0.72rem; margin-top: 4px;">Tap to select on map</div></button>
+        <button type="button" class="pick-btn" id="btnSetDrop" onclick="startPinSelection('drop')"><strong style="color: var(--danger);">● 2. Set Drop Point</strong><div id="dropText" style="color: var(--text-muted); font-size: 0.72rem; margin-top: 4px;">Tap to select on map</div></button>
       </div>
-
       <form id="orderForm" onsubmit="submitRideRequest(event)">
         <div class="input-box">
-          <label class="input-label">Passenger Name</label>
-          <input type="text" class="input-field" id="custName" placeholder="e.g. Rahul Das" required>
+          <label class="input-label">Ride Time</label>
+          <select class="input-field" id="rideTimeType" onchange="document.getElementById('scheduleTimePicker').style.display = this.value === 'SCHEDULED' ? 'block' : 'none';">
+            <option value="NOW">Ride Now ⚡</option>
+            <option value="SCHEDULED">Schedule Later 📅</option>
+          </select>
+          <input type="datetime-local" class="input-field" id="scheduleTimePicker" style="display: none; margin-top: 8px;">
         </div>
-
-        <div class="input-box">
-          <label class="input-label">Phone Number</label>
-          <input type="tel" class="input-field" id="custPhone" placeholder="10-digit mobile number" required>
-        </div>
-
-        <div class="input-box">
-          <label class="input-label">Pickup Location</label>
-          <input type="text" class="input-field" id="pickupLandmark" placeholder="Fetching address..." required>
-        </div>
-
-        <div class="input-box">
-          <label class="input-label">Drop Destination</label>
-          <input type="text" class="input-field" id="dropLandmark" placeholder="Fetching address..." required>
-        </div>
-
+        <div class="input-box"><label class="input-label">Passenger Name</label><input type="text" class="input-field" id="custName" placeholder="e.g. Rahul Das" required></div>
+        <div class="input-box"><label class="input-label">Phone Number</label><input type="tel" class="input-field" id="custPhone" placeholder="10-digit mobile number" required></div>
+        <div class="input-box"><label class="input-label">Pickup Location</label><input type="text" class="input-field" id="pickupLandmark" placeholder="Fetching address..." required></div>
+        <div class="input-box"><label class="input-label">Drop Destination</label><input type="text" class="input-field" id="dropLandmark" placeholder="Fetching address..." required></div>
         <div class="fare-card">
-          <div>
-            <div style="font-size: 0.72rem; color: var(--text-muted);">Trip Distance</div>
-            <div style="font-weight: 700; color: #fff; font-size: 1rem;" id="tripDistText">0.0 km</div>
-          </div>
+          <div><div style="font-size: 0.72rem; color: var(--text-muted);">Trip Distance</div><div style="font-weight: 700; color: #fff; font-size: 1rem;" id="tripDistText">0.0 km</div></div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-yellow);" id="fareEstimateText">₹20</div>
         </div>
-
         <div style="display: flex; gap: 10px;">
           <button type="button" class="pick-btn" style="flex: 1; text-align: center;" onclick="closeBookingSheet()">Close</button>
           <button type="submit" class="primary-book-btn" style="flex: 2; padding: 14px;">Confirm & Request</button>
@@ -235,181 +119,135 @@
     </div>
   </div>
 
+  <!-- Passenger Final Fare Summary Modal -->
+  <div class="modal-overlay" id="passengerSummaryOverlay">
+    <div class="booking-sheet" style="border-top: 3px solid var(--primary); text-align: center; padding-bottom: 30px;">
+      <div class="sheet-handle"></div>
+      
+      <div style="width: 50px; height: 50px; background: rgba(16, 185, 129, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: var(--primary); font-size: 1.5rem;">
+        <i class="fa-solid fa-check"></i>
+      </div>
+
+      <h2 style="color: #fff; font-size: 1.25rem; margin-bottom: 4px;">Trip Completed!</h2>
+      <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">Thank you for riding with Cholo Auto</p>
+
+      <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 14px; text-align: left; margin-bottom: 16px; font-size: 0.88rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="color: var(--text-muted);">Vehicle:</span>
+          <strong style="color: #fff;">Auto WB19M3264</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="color: var(--text-muted);">Total Distance:</span>
+          <strong id="passSumDist" style="color: #fff;">0.0 km</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+          <span style="color: var(--text-muted);">Trip Type:</span>
+          <strong id="passSumType" style="color: #fff;">One Way</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.3); padding: 14px; border-radius: 12px; margin-bottom: 20px;">
+        <span style="font-weight: 700; font-size: 0.95rem; color: #fff;">Total Fare Paid:</span>
+        <span style="font-size: 1.5rem; font-weight: 800; color: var(--accent-yellow);" id="passSumFare">₹0</span>
+      </div>
+
+      <button class="primary-book-btn" style="width: 100%;" onclick="closePassengerSummary()">Done / Rate Trip</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
-  <!-- Leaflet & MQTT.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 
   <script>
     const map = L.map('map', { zoomControl: true }).setView([22.4837, 88.2023], 15);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(map);
 
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19,
-      attribution: 'Tiles &copy; Esri'
-    }).addTo(map);
-
-    const autoIcon = L.divIcon({
-      className: 'custom-auto-marker',
-      html: `<div class="marker-label-tag">WB19M3264</div><div class="marker-core"><i class="fa-solid fa-taxi"></i></div>`,
-      iconSize: [80, 50],
-      iconAnchor: [40, 45]
-    });
+    const autoIcon = L.divIcon({ className: 'custom-auto-marker', html: `<div class="marker-label-tag">WB19M3264</div><div class="marker-core"><i class="fa-solid fa-taxi"></i></div>`, iconSize: [80, 50], iconAnchor: [40, 45] });
+    const pickupIcon = L.divIcon({ html: '<div style="background:#10b981;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px #10b981;"></div>', className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
+    const dropIcon = L.divIcon({ html: '<div style="background:#ef4444;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px #ef4444;"></div>', className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
 
     let autoMarker = L.marker([22.4837, 88.2023], { icon: autoIcon }).addTo(map);
     let tripPolyline = L.polyline([], { color: '#facc15', weight: 4, dashArray: '6, 8' }).addTo(map);
     let driverToPickupLine = L.polyline([], { color: '#38bdf8', weight: 6, opacity: 0.9, dashArray: '8, 10' }).addTo(map);
 
     let autoCoords = [22.4837, 88.2023];
-    let pickupMarker = null;
-    let dropMarker = null;
-    let pickupCoords = null;
-    let dropCoords = null;
-    let pinSelectMode = null;
-    let currentTripDistance = 0;
-    let calculatedFare = 20;
-    let isRideActive = false;
-
+    let pickupMarker = null; let dropMarker = null; let pickupCoords = null; let dropCoords = null;
+    let pinSelectMode = null; let currentTripDistance = 0; let calculatedFare = 20; let isRideActive = false;
+    let orderPayloadType = "One Way ➡️";
     const successChime = new Audio('https://assets.mixkit.co/active_storage/sfx/1123/1123-preview.mp3');
 
-    // --- REVERSE GEOCODING FUNCTION ---
     async function reverseGeocode(lat, lng, textElementId, inputElementId) {
-      document.getElementById(textElementId).innerText = "Loading address...";
-      document.getElementById(inputElementId).value = "Loading address...";
-      
+      document.getElementById(textElementId).innerText = "Loading address..."; document.getElementById(inputElementId).value = "Loading address...";
       try {
         const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`);
         const data = await response.json();
-        
         if (data && data.display_name) {
-          const parts = data.display_name.split(', ');
-          const shortAddr = parts.slice(0, Math.min(3, parts.length)).join(', ');
-          
-          document.getElementById(textElementId).innerText = shortAddr;
-          document.getElementById(inputElementId).value = shortAddr;
-          return;
+          const parts = data.display_name.split(', '); const shortAddr = parts.slice(0, Math.min(3, parts.length)).join(', ');
+          document.getElementById(textElementId).innerText = shortAddr; document.getElementById(inputElementId).value = shortAddr; return;
         }
       } catch (err) {}
-      
-      const fallbackText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      document.getElementById(textElementId).innerText = fallbackText;
-      document.getElementById(inputElementId).value = fallbackText;
+      const fallbackText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`; document.getElementById(textElementId).innerText = fallbackText; document.getElementById(inputElementId).value = fallbackText;
     }
 
-    // --- GPS Location ---
     function useCurrentLocationForPickup() {
-      if (!navigator.geolocation) {
-        alert("Geolocation not supported.");
-        return;
-      }
+      if (!navigator.geolocation) return alert("Geolocation not supported.");
       navigator.geolocation.getCurrentPosition((pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        pickupCoords = [lat, lng];
-
+        const lat = pos.coords.latitude; const lng = pos.coords.longitude; pickupCoords = [lat, lng];
         if (pickupMarker) map.removeLayer(pickupMarker);
-        pickupMarker = L.marker([lat, lng], {
-          draggable: true,
-          icon: L.divIcon({ html: '<div style="background:#10b981;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px #10b981;"></div>', iconSize: [24, 24], iconAnchor: [12, 12] })
-        }).addTo(map).bindPopup("📍 Your Pickup").openPopup();
-
+        pickupMarker = L.marker([lat, lng], { draggable: true, icon: pickupIcon }).addTo(map).bindPopup("📍 Your Pickup").openPopup();
         reverseGeocode(lat, lng, 'pickupText', 'pickupLandmark');
-
-        pickupMarker.on('dragend', (e) => {
-          pickupCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
-          reverseGeocode(pickupCoords[0], pickupCoords[1], 'pickupText', 'pickupLandmark');
-          updateTripRoute();
-        });
-
-        map.setView([lat, lng], 16);
-        document.getElementById('btnSetPickup').classList.remove('active');
-        document.getElementById('btnSetDrop').classList.add('active');
-
-        if (!dropCoords) startPinSelection('drop');
-        else updateTripRoute();
-      }, () => toast("Couldn't get your location. Allow location access or pick on the map."),
-      { enableHighAccuracy: true, timeout: 10000 });
+        pickupMarker.on('dragend', (e) => { pickupCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng]; reverseGeocode(pickupCoords[0], pickupCoords[1], 'pickupText', 'pickupLandmark'); updateTripRoute(); });
+        map.setView([lat, lng], 16); document.getElementById('btnSetPickup').classList.remove('active'); document.getElementById('btnSetDrop').classList.add('active');
+        if (!dropCoords) startPinSelection('drop'); else updateTripRoute();
+      }, () => toast("Allow location access or pick on the map."), { enableHighAccuracy: true, timeout: 10000 });
     }
 
-    // --- Map Pin Drop ---
     function startPinSelection(mode) {
-      pinSelectMode = mode;
-      closeBookingSheet();
-      const banner = document.getElementById('pinHelperBanner');
-      banner.classList.add('active');
+      pinSelectMode = mode; closeBookingSheet();
+      document.getElementById('pinHelperBanner').classList.add('active');
       document.getElementById('pinHelperText').innerText = mode === 'pickup' ? "📍 Tap map to set PICKUP point" : "🏁 Tap map to set DROP destination";
     }
 
     map.on('click', (e) => {
       if (!pinSelectMode) return;
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
-
+      const lat = e.latlng.lat; const lng = e.latlng.lng;
       if (pinSelectMode === 'pickup') {
         pickupCoords = [lat, lng];
         if (pickupMarker) map.removeLayer(pickupMarker);
-        pickupMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
-        
+        pickupMarker = L.marker([lat, lng], { draggable: true, icon: pickupIcon }).addTo(map);
         reverseGeocode(lat, lng, 'pickupText', 'pickupLandmark');
-
-        pickupMarker.on('dragend', (evt) => {
-          pickupCoords = [evt.target.getLatLng().lat, evt.target.getLatLng().lng];
-          reverseGeocode(pickupCoords[0], pickupCoords[1], 'pickupText', 'pickupLandmark');
-          updateTripRoute();
-        });
-        
-        if (!dropCoords) {
-          pinSelectMode = 'drop';
-          document.getElementById('pinHelperText').innerText = "🏁 Now tap map to set DROP point";
-        } else finishPinSelection();
-        
+        pickupMarker.on('dragend', (evt) => { pickupCoords = [evt.target.getLatLng().lat, evt.target.getLatLng().lng]; reverseGeocode(pickupCoords[0], pickupCoords[1], 'pickupText', 'pickupLandmark'); updateTripRoute(); });
+        if (!dropCoords) { pinSelectMode = 'drop'; document.getElementById('pinHelperText').innerText = "🏁 Now tap map to set DROP point"; } else finishPinSelection();
       } else if (pinSelectMode === 'drop') {
         dropCoords = [lat, lng];
         if (dropMarker) map.removeLayer(dropMarker);
-        dropMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
-        
+        dropMarker = L.marker([lat, lng], { draggable: true, icon: dropIcon }).addTo(map);
         reverseGeocode(lat, lng, 'dropText', 'dropLandmark');
-
-        dropMarker.on('dragend', (evt) => {
-          dropCoords = [evt.target.getLatLng().lat, evt.target.getLatLng().lng];
-          reverseGeocode(dropCoords[0], dropCoords[1], 'dropText', 'dropLandmark');
-          updateTripRoute();
-        });
+        dropMarker.on('dragend', (evt) => { dropCoords = [evt.target.getLatLng().lat, evt.target.getLatLng().lng]; reverseGeocode(dropCoords[0], dropCoords[1], 'dropText', 'dropLandmark'); updateTripRoute(); });
         finishPinSelection();
       }
       updateTripRoute();
     });
 
-    function finishPinSelection() {
-      pinSelectMode = null;
-      document.getElementById('pinHelperBanner').classList.remove('active');
-      openBookingSheet();
-    }
+    function finishPinSelection() { pinSelectMode = null; document.getElementById('pinHelperBanner').classList.remove('active'); openBookingSheet(); }
 
-    // Upgraded Distance Calculation with Road Curvature Factor (1.5x multiplier)
     function calcDist(p1, p2) {
-      const R = 6371;
-      const dLat = (p2[0] - p1[0]) * Math.PI / 180;
-      const dLng = (p2[1] - p1[1]) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(p1[0] * Math.PI / 180) * Math.cos(p2[0] * Math.PI / 180) *
-                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const R = 6371; const dLat = (p2[0] - p1[0]) * Math.PI / 180; const dLng = (p2[1] - p1[1]) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(p1[0] * Math.PI / 180) * Math.cos(p2[0] * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
       const straightLineDist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      
-      // Multiply by 1.5 to simulate real road bends and turns (turning ~3.3km into ~5.0km)
-      const actualRoadDist = straightLineDist * 1.5;
-      
-      return actualRoadDist.toFixed(1);
+      return (straightLineDist * 1.6).toFixed(1); 
     }
 
     function updateTripRoute() {
       if (pickupCoords && dropCoords) {
-        tripPolyline.setLatLngs([pickupCoords, dropCoords]);
-        map.fitBounds(tripPolyline.getBounds(), { padding: [50, 50] });
-        currentTripDistance = calcDist(pickupCoords, dropCoords);
-        calculatedFare = Math.round(20 + (currentTripDistance * 12));
-        document.getElementById('tripDistText').innerText = `${currentTripDistance} km`;
-        document.getElementById('fareEstimateText').innerText = `₹${calculatedFare}`;
+        tripPolyline.setLatLngs([pickupCoords, dropCoords]); map.fitBounds(tripPolyline.getBounds(), { padding: [50, 50] });
+        let baseDist = parseFloat(calcDist(pickupCoords, dropCoords));
+        let tType = document.querySelector('input[name="tripType"]:checked').value;
+        currentTripDistance = tType === 'round_trip' ? (baseDist * 2).toFixed(1) : baseDist.toFixed(1);
+        calculatedFare = Math.round(20 + (parseFloat(currentTripDistance) * 12));
+        document.getElementById('tripDistText').innerText = `${currentTripDistance} km`; document.getElementById('fareEstimateText').innerText = `₹${calculatedFare}`;
       }
     }
 
@@ -418,8 +256,7 @@
         driverToPickupLine.setLatLngs([autoCoords, pickupCoords]);
         const distToPickup = calcDist(autoCoords, pickupCoords);
         document.getElementById('hudPickupDist').innerText = `${distToPickup} km away`;
-        const etaMins = Math.max(1, Math.round((distToPickup / 20) * 60));
-        document.getElementById('hudPickupEta').innerText = `~${etaMins} mins`;
+        document.getElementById('hudPickupEta').innerText = `~${Math.max(1, Math.round((distToPickup / 20) * 60))} mins`;
         if (fit) map.fitBounds(driverToPickupLine.getBounds(), { padding: [70, 70] });
       }
     }
@@ -430,101 +267,68 @@
     const TOPIC_BOOK = TOPIC_ROOT + "/booking";
     const TOPIC_RES  = TOPIC_ROOT + "/response";
 
-    const mqttOptions = { 
-        reconnectPeriod: 3000,
-        keepalive: 30,
-        clientId: 'cholo_passenger_' + Math.random().toString(16).substr(2, 8)
-    };
+    const mqttOptions = { reconnectPeriod: 3000, keepalive: 30, clientId: 'cholo_pass_' + Math.random().toString(16).substr(2, 8) };
     const mqttClient = mqtt.connect(MQTT_BROKER, mqttOptions);
 
     if (window.Capacitor && window.Capacitor.Plugins.App) {
         window.Capacitor.Plugins.App.addListener('appStateChange', ({ isActive }) => {
-            if (isActive && !mqttClient.connected) {
-                mqttClient.reconnect();
-            }
+            if (isActive && !mqttClient.connected) { mqttClient.reconnect(); }
         });
     }
 
-    let currentBookingId = null;   
-    let pendingTimer = null;
-    let lastLocTime = 0;
-
-    function toast(msg) {
-      const t = document.getElementById('toast');
-      t.innerText = msg; t.style.display = 'block';
-      clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 4000);
-    }
+    let currentBookingId = null; let pendingTimer = null; let lastLocTime = 0;
+    function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 4000); }
     function setStatus(txt) { document.getElementById('vehicleStatusText').innerText = txt; }
 
-    mqttClient.on('connect', () => {
-      mqttClient.subscribe([TOPIC_LOC, TOPIC_RES]);
-      if (!currentBookingId) setStatus(lastLocTime ? "Tracking Live" : "Waiting for auto...");
-    });
+    mqttClient.on('connect', () => { mqttClient.subscribe([TOPIC_LOC, TOPIC_RES]); if (!currentBookingId) setStatus(lastLocTime ? "Tracking Live" : "Waiting for auto..."); });
     mqttClient.on('offline', () => setStatus("Reconnecting..."));
-
     setInterval(() => { if (!currentBookingId && lastLocTime && Date.now() - lastLocTime > 30000) setStatus("Auto offline"); }, 5000);
 
     mqttClient.on('message', (topic, msg) => {
-      let data;
-      try { data = JSON.parse(msg.toString()); } catch (e) { return; }
+      let data; try { data = JSON.parse(msg.toString()); } catch (e) { return; }
       if (!data || typeof data !== 'object') return;
-
       if (topic === TOPIC_LOC) {
-        const lat = parseFloat(data.lat), lng = parseFloat(data.lng);
-        if (isNaN(lat) || isNaN(lng)) return;
-        autoCoords = [lat, lng];
-        lastLocTime = Date.now();
-        autoMarker.setLatLng(autoCoords);
+        const lat = parseFloat(data.lat), lng = parseFloat(data.lng); if (isNaN(lat) || isNaN(lng)) return;
+        autoCoords = [lat, lng]; lastLocTime = Date.now(); autoMarker.setLatLng(autoCoords);
         if (!currentBookingId) setStatus("Tracking Live");
         if (isRideActive) updateDriverPickupRoute(false);
       } else if (topic === TOPIC_RES) {
         if (!currentBookingId || data.id !== currentBookingId) return;
-
         if (data.status === "ACCEPTED") {
-          clearTimeout(pendingTimer);
-          isRideActive = true;
+          clearTimeout(pendingTimer); isRideActive = true;
           document.getElementById('rideTitle').innerText = "Cholo Auto is on the way!";
-          document.getElementById('hudOtp').innerText = data.otp;
-          setStatus("Driver Arriving");
-          successChime.play().catch(e => console.log(e));
-          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-          updateDriverPickupRoute(true);
+          document.getElementById('hudOtp').innerText = data.otp; setStatus("Driver Arriving");
+          successChime.play().catch(e => console.log(e)); if (navigator.vibrate) navigator.vibrate([200, 100, 200]); updateDriverPickupRoute(true);
         } else if (data.status === "STARTED") {
-          isRideActive = false;
-          driverToPickupLine.setLatLngs([]);
+          isRideActive = false; driverToPickupLine.setLatLngs([]);
           document.getElementById('rideTitle').innerText = "Trip in progress";
-          document.getElementById('hudPickupDist').innerText = "Picked up";
-          document.getElementById('hudPickupEta').innerText = "--";
-          setStatus("On Trip");
+          document.getElementById('hudPickupDist').innerText = "Picked up"; document.getElementById('hudPickupEta').innerText = "--"; setStatus("On Trip");
+        } else if (data.status === "RETURN_STARTED") {
+          isRideActive = false; driverToPickupLine.setLatLngs([]);
+          document.getElementById('rideTitle').innerText = "Return trip in progress 🔄";
+          document.getElementById('hudPickupDist').innerText = "Heading back"; document.getElementById('hudPickupEta').innerText = "--"; setStatus("On Return Trip");
         } else if (data.status === "COMPLETED") {
-          resetCustomerView();
-          toast("🏁 Ride completed! Thank you.");
-        } else if (data.status === "REJECTED") {
-          resetCustomerView();
-          toast(data.reason === "offduty" ? "Driver is off duty right now." : data.reason === "busy" ? "Driver is busy. Try again." : "Driver couldn't take this ride.");
+          document.getElementById('rideStatusCard').classList.remove('active');
+          driverToPickupLine.setLatLngs([]);
+          document.getElementById('passSumDist').innerText = `${currentTripDistance} km`;
+          document.getElementById('passSumType').innerText = orderPayloadType;
+          document.getElementById('passSumFare').innerText = `₹${calculatedFare}`;
+          document.getElementById('passengerSummaryOverlay').classList.add('active');
+          successChime.play().catch(e => console.log(e));
+        } else if (data.status === "REJECTED" || data.status === "CANCELLED") {
+          resetCustomerView(); 
+          let mText = data.status === "CANCELLED" ? "⚠️ Driver cancelled to prioritize another trip. Please book again." : "Driver couldn't take this ride.";
+          toast(mText);
         }
       }
     });
 
-    function resetCustomerView() {
-      clearTimeout(pendingTimer);
-      currentBookingId = null;
-      isRideActive = false;
-      driverToPickupLine.setLatLngs([]);
-      document.getElementById('rideStatusCard').classList.remove('active');
-      document.getElementById('bookingBar').style.display = 'flex';
-      setStatus(Date.now() - lastLocTime > 30000 ? "Auto offline" : "Tracking Live");
-    }
-
-    function cancelActiveRide() {
-      if (confirm("Cancel this booking?")) {
-        mqttClient.publish(TOPIC_RES, JSON.stringify({ id: currentBookingId, status: "CANCELLED" }), { qos: 1 });
-        resetCustomerView();
-      }
-    }
-
+    function resetCustomerView() { clearTimeout(pendingTimer); currentBookingId = null; isRideActive = false; driverToPickupLine.setLatLngs([]); document.getElementById('rideStatusCard').classList.remove('active'); document.getElementById('bookingBar').style.display = 'flex'; setStatus(Date.now() - lastLocTime > 30000 ? "Auto offline" : "Tracking Live"); }
+    function closePassengerSummary() { document.getElementById('passengerSummaryOverlay').classList.remove('active'); resetCustomerView(); }
+    function cancelActiveRide() { if (confirm("Cancel this booking?")) { mqttClient.publish(TOPIC_RES, JSON.stringify({ id: currentBookingId, status: "CANCELLED" }), { qos: 1 }); resetCustomerView(); } }
     function openBookingSheet() { document.getElementById('bookingOverlay').classList.add('active'); }
     function closeBookingSheet() { document.getElementById('bookingOverlay').classList.remove('active'); }
+    const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
     function submitRideRequest(e) {
       e.preventDefault();
@@ -532,45 +336,47 @@
       if (!pickupCoords || !dropCoords) { toast("Set Pickup and Drop points on the map."); return; }
       if (!mqttClient.connected) { toast("Not connected. Try again."); return; }
 
+      let rTime = document.getElementById('rideTimeType').value;
+      let sTime = "NOW";
+      if (rTime === "SCHEDULED") {
+          sTime = document.getElementById('scheduleTimePicker').value;
+          if(!sTime) { toast("Please select a date and time to schedule."); return; }
+      }
+      
+      let tType = document.querySelector('input[name="tripType"]:checked').value;
+      orderPayloadType = tType === 'round_trip' ? 'Round Trip 🔄' : 'One Way ➡️';
+      
       successChime.play().then(() => { successChime.pause(); successChime.currentTime = 0; }).catch(() => {});
-
-      const name = document.getElementById('custName').value.trim();
-      const phone = document.getElementById('custPhone').value.replace(/[\s-]/g, '');
-      const pLandmark = document.getElementById('pickupLandmark').value.trim();
-      const dLandmark = document.getElementById('dropLandmark').value.trim();
+      
+      const name = document.getElementById('custName').value.trim(); const phone = document.getElementById('custPhone').value.replace(/[\s-]/g, '');
+      const pLandmark = document.getElementById('pickupLandmark').value.trim(); const dLandmark = document.getElementById('dropLandmark').value.trim();
 
       const orderPayload = {
         id: 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        name: name,
-        phone: phone,
-        pickup: pLandmark, 
-        drop: dLandmark,   
-        pickupRaw: pickupCoords,
-        dropRaw: dropCoords,
-        distance: Number(currentTripDistance),
-        fare: calculatedFare,
-        time: new Date().toLocaleTimeString()
+        name: name, phone: phone, pickup: pLandmark, drop: dLandmark,
+        pickupRaw: pickupCoords, dropRaw: dropCoords, distance: Number(currentTripDistance),
+        fare: calculatedFare, time: new Date().toLocaleTimeString(), tripType: tType, schedule: sTime 
       };
 
       currentBookingId = orderPayload.id;
       mqttClient.publish(TOPIC_BOOK, JSON.stringify(orderPayload), { qos: 1 });
+      
+      const mapLink = `https://www.google.com/maps/dir/?api=1&origin=${pickupCoords[0]},${pickupCoords[1]}&destination=${dropCoords[0]},${dropCoords[1]}`;
+      const schedText = sTime === "NOW" ? "Immediate ⚡" : `📅 ${new Date(sTime).toLocaleString()}`;
+      const typeText = tType === "round_trip" ? "Round Trip 🔄" : "One Way ➡️";
+      const text = `🛺 <b>NEW RIDE REQUEST!</b>\n👤 <b>Pass:</b> ${esc(name)}\n📞 <b>Mob:</b> ${esc(phone)}\n🕒 <b>Time:</b> ${schedText}\n🔄 <b>Type:</b> ${typeText}\n📍 <b>Pick:</b> ${esc(pLandmark)}\n🏁 <b>Drop:</b> ${esc(dLandmark)}\n📏 <b>Dist:</b> ${currentTripDistance} km\n💰 <b>Fare:</b> ₹${calculatedFare}\n🗺️ <a href="${esc(mapLink)}">Open Navigation</a>`;
+      fetch(`https://api.telegram.org/botPASTE_NEW_BOT_TOKEN/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: "PASTE_CHAT_ID", text, parse_mode: 'HTML', disable_web_page_preview: true }) }).catch(() => {});
 
-      closeBookingSheet();
-      document.getElementById('bookingBar').style.display = 'none';
-      document.getElementById('rideTitle').innerText = "Waiting for driver...";
-      document.getElementById('hudOtp').innerText = "----";
-      document.getElementById('hudPickupDist').innerText = "--";
-      document.getElementById('hudPickupEta').innerText = "--";
-      document.getElementById('hudFare').innerText = `₹${calculatedFare}`;
-      document.getElementById('rideStatusCard').classList.add('active');
-      setStatus("Request sent");
-
+      closeBookingSheet(); document.getElementById('bookingBar').style.display = 'none';
+      document.getElementById('rideTitle').innerText = sTime === "NOW" ? "Waiting for driver..." : "Requesting Scheduled Ride...";
+      document.getElementById('hudOtp').innerText = "----"; document.getElementById('hudPickupDist').innerText = "--"; document.getElementById('hudPickupEta').innerText = "--"; document.getElementById('hudFare').innerText = `₹${calculatedFare}`;
+      document.getElementById('rideStatusCard').classList.add('active'); setStatus("Request sent");
+      
       clearTimeout(pendingTimer);
       pendingTimer = setTimeout(() => {
         if (currentBookingId && !isRideActive) {
           mqttClient.publish(TOPIC_RES, JSON.stringify({ id: currentBookingId, status: "CANCELLED" }), { qos: 1 });
-          resetCustomerView();
-          toast("No response from driver.");
+          resetCustomerView(); toast("No response from driver.");
         }
       }, 90000);
     }
